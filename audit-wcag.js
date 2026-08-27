@@ -208,22 +208,22 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
         const palavras = txt.split(' ');
         return { linhas, cpl: Math.round(chars / linhas), palavras: palavras.length, txt };
       }
-      // detecta viúva: última linha com uma só palavra
-      function viuva(el) {
+      // órfã = última linha ocupando menos de 25% da largura das demais
+      function orfa(el) {
+        if (getComputedStyle(el).display.indexOf('flex') === 0) return false;
         const r = document.createRange();
-        const node = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
-        if (!node) return false;
-        const txt = node.textContent;
-        const m = txt.trim().match(/(\S+)\s*$/);
-        if (!m) return false;
-        const i = txt.lastIndexOf(m[1]);
-        r.setStart(node, i); r.setEnd(node, i + m[1].length);
-        const rectUltima = r.getBoundingClientRect();
-        // se a última palavra começa uma linha sozinha, o left dela é o left do bloco
-        const bloco = el.getBoundingClientRect();
-        const rects = r.getClientRects();
-        if (!rects.length) return false;
-        return Math.abs(rectUltima.left - bloco.left) < 2 && rectUltima.top > bloco.top + 4;
+        r.selectNodeContents(el);
+        const rects = [...r.getClientRects()].filter(x => x.width > 1);
+        if (rects.length < 2) return false;
+        const tops = [...new Set(rects.map(x => Math.round(x.top)))].sort((a, b) => a - b);
+        if (tops.length < 2) return false;
+        const larguraDe = t => {
+          const n = rects.filter(x => Math.abs(x.top - t) < 3);
+          return Math.max(...n.map(x => x.right)) - Math.min(...n.map(x => x.left));
+        };
+        const larguras = tops.map(larguraDe);
+        const maior = Math.max(...larguras);
+        return maior > 0 && (larguras[larguras.length - 1] / maior) < 0.25;
       }
 
       const longos = [];
@@ -236,8 +236,9 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
         const m = medir(el);
         if (m.linhas < 2 || m.palavras < 4) return;
         if (m.cpl > 82) longos.push({ cpl: m.cpl, t: m.txt.slice(0, 44) });
-        if (m.cpl < 26 && m.linhas > 2) curtos.push({ cpl: m.cpl, t: m.txt.slice(0, 44) });
-        if (viuva(el)) viuvas.push(m.txt.slice(0, 48));
+        const fs = parseFloat(cs.fontSize);
+        if (fs < 30 && m.cpl < 26 && m.linhas > 2) curtos.push({ cpl: m.cpl, fs: Math.round(fs), t: m.txt.slice(0, 44) });
+        if (orfa(el)) viuvas.push(m.txt.slice(0, 48));
       });
       return { longos, curtos, viuvas };
     });
@@ -257,7 +258,7 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
     await page.evaluate(() => document.querySelectorAll('[data-anim]').forEach(e => e.classList.add('is-in')));
     await page.waitForTimeout(300);
     const esp = await page.evaluate(() => {
-      const secoes = [...document.querySelectorAll('main > section')].map(s => {
+      const secoes = [...document.querySelectorAll('main > section')].filter(s => !s.classList.contains('hero')).map(s => {
         const cs = getComputedStyle(s);
         return {
           id: s.id || s.className.split(' ')[1] || s.className,

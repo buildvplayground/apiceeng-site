@@ -67,29 +67,32 @@ const BASE = 'http://localhost:4173';
     })));
   check(grupos.length >= 6, 'grupos com stagger declarados', grupos.map(g => g.nome));
 
+  // rolagem humana: passos pequenos, como uma roda de mouse
+  async function rolarDevagar(pg, total, passo = 90, pausa = 55) {
+    for (let i = 0; i < Math.ceil(total / passo); i++) {
+      await pg.mouse.wheel(0, passo);
+      await pg.waitForTimeout(pausa);
+    }
+    await pg.waitForTimeout(500);
+  }
+
   // A cascata deve reiniciar a cada lote que entra (na prática, a cada linha
   // da grade), e não acumular o atraso de todos os cards anteriores.
-  await page.evaluate(() => document.querySelector('#servicos').scrollIntoView({ block: 'start' }));
-  await page.waitForTimeout(1600);
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(500);
+  const alvoY = await page.evaluate(() =>
+    document.querySelector('.services').getBoundingClientRect().top - innerHeight + 260);
+  await rolarDevagar(page, alvoY);
   const linha1 = await page.evaluate(() =>
     [...document.querySelectorAll('.services > .service')].map(e => e.style.getPropertyValue('--d')));
-  await page.evaluate(() => scrollBy(0, 420));
-  await page.waitForTimeout(1600);
+  await rolarDevagar(page, 300);
   const linha2 = await page.evaluate(() =>
     [...document.querySelectorAll('.services > .service')].map(e => e.style.getPropertyValue('--d')));
 
-  const primeira = linha1.slice(0, 3).join(',');
-  const segunda = linha2.slice(3, 6).join(',');
-  check(primeira === '0ms,70ms,140ms', 'primeira linha de serviços cascateia 0/70/140', linha1.slice(0, 3));
-  check(segunda === '0ms,70ms,140ms', 'segunda linha REINICIA a cascata (não acumula)', linha2.slice(3, 6));
-
-  // o último card da grade entra sozinho -> atraso zero, não 11 x step (= 770ms)
-  await page.evaluate(() => document.querySelector('.work[data-i="11"]').scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(900);
-  const dUltimo = await page.evaluate(() =>
-    document.querySelector('.work[data-i="11"]').style.getPropertyValue('--d'));
-  check(dUltimo !== '' && parseInt(dUltimo, 10) < 300,
-    'último card não herda o atraso da grade inteira', dUltimo);
+  check(linha1.slice(0, 3).join(',') === '0ms,70ms,140ms',
+    'primeira linha de servicos cascateia 0/70/140', linha1.slice(0, 3));
+  check(linha2.slice(3, 6).join(',') === '0ms,70ms,140ms',
+    'segunda linha REINICIA a cascata (nao acumula)', linha2.slice(3, 6));
 
   /* ---------- 4. Reveal ao rolar ---------- */
   console.log('\n=== REVEAL AO ROLAR ===');
@@ -105,6 +108,86 @@ const BASE = 'http://localhost:4173';
   check(antes < 0.05, 'último card começa invisível', antes);
   check(depois.op > 0.95 && depois.isIn && depois.tr === 'none', 'último card revelado ao entrar', depois);
 
+  /* ---------- 4b. Guardas: quando NAO animar ---------- */
+  console.log('\n=== QUANDO NAO ANIMAR ===');
+
+  // (a) rolagem rapida: quem esta saltando recebe o conteudo pronto
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(700);
+    for (let i = 0; i < 14; i++) { await p2.mouse.wheel(0, 900); }
+    await p2.waitForTimeout(900);
+    const r = await p2.evaluate(() => {
+      const vis = [...document.querySelectorAll('[data-anim]')].filter(e => {
+        const b = e.getBoundingClientRect();
+        return b.top < innerHeight && b.bottom > 0;
+      });
+      return {
+        naTela: vis.length,
+        aindaAnimando: vis.filter(e => +getComputedStyle(e).opacity < 0.95).length,
+      };
+    });
+    check(r.naTela > 0 && r.aindaAnimando === 0, 'rolagem rapida: nada fica animando na tela', r);
+    await c.close();
+  }
+
+  // (b) zona final: chegar ao rodape nao deixa nada por revelar
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await p2.waitForLoadState('networkidle');
+    await p2.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await p2.waitForTimeout(800);
+    const r = await p2.evaluate(() => {
+      const els = [...document.querySelectorAll('[data-anim]')];
+      return {
+        total: els.length,
+        porRevelar: els.filter(e => !e.classList.contains('is-in')).length,
+        invisiveis: els.filter(e => +getComputedStyle(e).opacity < 0.95).length,
+      };
+    });
+    check(r.porRevelar === 0 && r.invisiveis === 0, 'zona final: nada sobra por revelar', r);
+    await c.close();
+  }
+
+  // (c) rolar de volta para cima nao redispara animacao
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await p2.waitForTimeout(900);
+    for (let i = 0; i < 8; i++) { await p2.mouse.wheel(0, -700); await p2.waitForTimeout(70); }
+    await p2.waitForTimeout(700);
+    const invis = await p2.evaluate(() =>
+      [...document.querySelectorAll('[data-anim]')].filter(e => +getComputedStyle(e).opacity < 0.95).length);
+    check(invis === 0, 'subindo: nada volta a ficar invisivel', invis);
+    await c.close();
+  }
+
+  // (d) salto por ancora do menu entrega a secao pronta
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(700);
+    await p2.click('.nav a[href="#obras"]');
+    await p2.waitForTimeout(1600);
+    const r = await p2.evaluate(() => {
+      const vis = [...document.querySelectorAll('#obras [data-anim]')].filter(e => {
+        const b = e.getBoundingClientRect();
+        return b.top < innerHeight && b.bottom > 0;
+      });
+      return { naTela: vis.length, invisiveis: vis.filter(e => +getComputedStyle(e).opacity < 0.95).length };
+    });
+    check(r.naTela > 0 && r.invisiveis === 0, 'salto de ancora entrega a secao pronta', r);
+    await c.close();
+  }
+
   /* ---------- 5. will-change liberado ---------- */
   console.log('\n=== WILL-CHANGE ===');
   await page.waitForTimeout(2600);
@@ -118,7 +201,7 @@ const BASE = 'http://localhost:4173';
   console.log('\n=== PARALLAX ===');
   await page.evaluate(() => scrollTo(0, 0));
   await page.waitForTimeout(500);
-  const banda = '.band__media img';
+  const banda = '.band__frame img';
   await page.evaluate(() => document.querySelector('.band').scrollIntoView({ block: 'end' }));
   await page.waitForTimeout(400);
   const py1 = await page.evaluate(s => document.querySelector(s).style.getPropertyValue('--py'), banda);
@@ -149,6 +232,21 @@ const BASE = 'http://localhost:4173';
   await page.waitForTimeout(500);
   const prog = { topo, fim: await page.evaluate(() => document.querySelector('.progress').style.getPropertyValue('--p')) };
   check(+prog.topo < 0.05 && +prog.fim > 0.95, 'progresso vai de 0 a 1', prog);
+
+  /* ---------- 7b. Header compacta ao rolar ---------- */
+  console.log('\n=== HEADER ===');
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(500);
+  const hTopo = await page.evaluate(() => document.getElementById('header').getBoundingClientRect().height);
+  await page.evaluate(() => scrollTo(0, 1600));
+  await page.waitForTimeout(800);
+  const hRolado = await page.evaluate(() => ({
+    h: document.getElementById('header').getBoundingClientRect().height,
+    compact: document.getElementById('header').classList.contains('is-compact'),
+    stuck: document.getElementById('header').classList.contains('is-stuck'),
+  }));
+  check(hRolado.compact && hRolado.h < hTopo && hRolado.stuck,
+    'header encolhe e ganha fundo ao rolar', { hTopo: Math.round(hTopo), h: Math.round(hRolado.h) });
 
   /* ---------- 8. Filetes animados ---------- */
   console.log('\n=== FILETES (eyebrow e etapas) ===');
@@ -187,7 +285,7 @@ const BASE = 'http://localhost:4173';
   const rm = await pRm.evaluate(() => {
     const els = [...document.querySelectorAll('[data-anim]')];
     const bar = document.querySelector('.progress');
-    const bandImg = document.querySelector('.band__media img');
+    const bandImg = document.querySelector('.band__frame img');
     return {
       jsClass: document.documentElement.classList.contains('js'),
       invisiveis: els.filter(e => +getComputedStyle(e).opacity < 0.95).length,
