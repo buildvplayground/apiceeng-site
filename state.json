@@ -1,0 +1,24 @@
+{
+  "projeto": "apiceeng",
+  "cliente": "Ápice Arquitetura e Engenharia",
+  "etapa_atual": "2b",
+  "atualizado_em": "2026-08-27",
+  "copy": { "tipo": "provisoria", "motivo": "briefing do Drive em branco (planilha template não preenchida)" },
+  "etapas": [
+    { "n": 1,  "nome": "Extrair do Drive",        "status": "done" },
+    { "n": 2,  "nome": "Organizar pastas",        "status": "done" },
+    { "n": "2b","nome": "Repositório GitHub",     "status": "doing" },
+    { "n": 3,  "nome": "Design system",           "status": "pending" },
+    { "n": 4,  "nome": "Copy (provisória)",       "status": "pending" },
+    { "n": 5,  "nome": "Front-end",               "status": "pending" },
+    { "n": 6,  "nome": "Ajustes finais",          "status": "pending" },
+    { "n": 7,  "nome": "Tags e módulos LGPD",     "status": "pending" },
+    { "n": 8,  "nome": "Revisão humana",          "status": "pending" },
+    { "n": 9,  "nome": "Deploy",                  "status": "pending" }
+  ],
+  "pendencias": [],
+  "links": {
+    "drive": "https://drive.google.com/drive/folders/1olCAkmYKoTa6e4lr3c4EUFqQIxXBnE3M",
+    "repo": null, "preview": null, "dominio": null
+  }
+}
