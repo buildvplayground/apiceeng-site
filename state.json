@@ -42,13 +42,13 @@
       "n": 5,
       "nome": "Front-end",
       "status": "done",
-      "nota": "HTML+CSS+JS vanilla; 3 páginas"
+      "nota": "HTML+CSS+JS vanilla; 3 páginas; 12 obras no portfólio; 2 faixas de imagem com parallax; sistema de movimento próprio (motion.css + motion.js)"
     },
     {
       "n": 6,
       "nome": "Ajustes finais",
       "status": "done",
-      "nota": "imagens 71,7MB→1,6MB (-97,8%); overflow 0 em 320–1920px; contraste WCAG AA/AAA medido"
+      "nota": "imagens 96MB→2,8MB; 4 auditorias automatizadas passando: funcional, movimento, WCAG (axe-core sem violações) e contraste de texto sobre foto"
     },
     {
       "n": 7,
@@ -153,5 +153,12 @@
     "repo": "https://github.com/dev-buildv/apiceeng-site",
     "preview": "http://localhost:4173",
     "dominio": null
+  },
+  "auditorias": {
+    "funcional": "audit.js — requisitos BuildV, responsividade 320–1920, a11y estrutural",
+    "movimento": "audit-motion.js — entradas, cascata por lote, parallax e as guardas de \"quando não animar\"",
+    "wcag": "audit-wcag.js — axe-core A+AA+2.2, alvos de toque, zoom 200/400%, 1.4.12, teclado, tipografia",
+    "contraste_foto": "audit-contraste-foto.js — contraste do texto sobre fotografia, pelo pior pixel do fundo",
+    "estado": "as quatro passam sem falhas em 27/08/2026"
   }
 }

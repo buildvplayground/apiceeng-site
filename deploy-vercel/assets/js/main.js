@@ -2,8 +2,6 @@
 (function () {
   'use strict';
 
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   /* ---------- Ano no rodapé ---------- */
   var ano = document.getElementById('ano');
   if (ano) ano.textContent = new Date().getFullYear();
@@ -44,21 +42,7 @@
     }
   });
 
-  /* ---------- Revelação por scroll ---------- */
-  var reveals = document.querySelectorAll('.reveal');
-  if (reduced || !('IntersectionObserver' in window)) {
-    reveals.forEach(function (el) { el.classList.add('is-in'); });
-  } else {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-in');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
-    reveals.forEach(function (el) { io.observe(el); });
-  }
+  /* Revelação por scroll e parallax: ver motion.js */
 
   /* ---------- Lightbox do portfólio (só existe na home) ---------- */
   var works = Array.prototype.slice.call(document.querySelectorAll('.work'));

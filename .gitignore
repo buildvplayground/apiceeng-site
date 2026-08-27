@@ -24,6 +24,9 @@ node_modules/
 # Ferramentas locais de desenvolvimento (não fazem parte do entregável)
 preview-server.js
 audit.js
+audit-motion.js
+audit-wcag.js
+audit-contraste-foto.js
 shot.js
-colorcheck.js
 package-lock.json
+node_modules/

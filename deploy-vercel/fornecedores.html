@@ -12,8 +12,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/motion.css">
+<script src="assets/js/motion.js"></script>
 </head>
 <body>
+
+<div class="progress" aria-hidden="true"></div>
 
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
@@ -38,9 +42,9 @@
 
 <main class="page" id="conteudo">
   <div class="shell">
-    <div class="page__inner">
-      <p class="eyebrow">Cadastro</p>
-      <h1>Fornecedores e Trabalhe Conosco</h1>
+    <div class="page__inner" data-stagger="60">
+      <p class="eyebrow" data-anim="up"><i class="eyebrow__rule" aria-hidden="true"></i>Cadastro</p>
+      <h1 data-anim="up" style="--d:80ms">Fornecedores e Trabalhe Conosco</h1>
       <p class="page__meta">Um canal só, para empresas e para profissionais.</p>
 
       <p>
@@ -123,10 +127,10 @@
     <div class="footer__grid">
       <div class="footer__brand">
         <img src="assets/img/logo-horizontal-branco.webp" alt="Ápice Arquitetura e Engenharia" width="600" height="223" loading="lazy">
-        <p>Obras corporativas e industriais conduzidas de ponta a ponta — projeto, execução e gestão.</p>
+        <p>Obras corporativas e industriais conduzidas de ponta a ponta — projeto, execução e gestão.</p>
       </div>
       <div>
-        <h3>Navegar</h3>
+        <h2 class="footer__title">Navegar</h2>
         <ul>
           <li><a href="index.html#servicos">Serviços</a></li>
           <li><a href="index.html#obras">Obras</a></li>
@@ -135,7 +139,7 @@
         </ul>
       </div>
       <div>
-        <h3>Contato</h3>
+        <h2 class="footer__title">Contato</h2>
         <ul>
           <li><a href="https://wa.me/5511999999999" target="_blank" rel="noopener">WhatsApp</a></li>
         </ul>
