@@ -20,3 +20,10 @@ Thumbs.db
 desktop.ini
 node_modules/
 *.log
+
+# Ferramentas locais de desenvolvimento (não fazem parte do entregável)
+preview-server.js
+audit.js
+shot.js
+colorcheck.js
+package-lock.json

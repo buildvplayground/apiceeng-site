@@ -1,24 +1,157 @@
 {
   "projeto": "apiceeng",
   "cliente": "Ápice Arquitetura e Engenharia",
-  "etapa_atual": "2b",
+  "etapa_atual": "8",
   "atualizado_em": "2026-08-27",
-  "copy": { "tipo": "provisoria", "motivo": "briefing do Drive em branco (planilha template não preenchida)" },
+  "copy": {
+    "tipo": "provisoria",
+    "motivo": "briefing do Drive em branco (planilha template não preenchida)",
+    "arquivo": "Copys/copy-provisoria.md"
+  },
   "etapas": [
-    { "n": 1,  "nome": "Extrair do Drive",        "status": "done" },
-    { "n": 2,  "nome": "Organizar pastas",        "status": "done" },
-    { "n": "2b","nome": "Repositório GitHub",     "status": "doing" },
-    { "n": 3,  "nome": "Design system",           "status": "pending" },
-    { "n": 4,  "nome": "Copy (provisória)",       "status": "pending" },
-    { "n": 5,  "nome": "Front-end",               "status": "pending" },
-    { "n": 6,  "nome": "Ajustes finais",          "status": "pending" },
-    { "n": 7,  "nome": "Tags e módulos LGPD",     "status": "pending" },
-    { "n": 8,  "nome": "Revisão humana",          "status": "pending" },
-    { "n": 9,  "nome": "Deploy",                  "status": "pending" }
+    {
+      "n": 1,
+      "nome": "Extrair do Drive",
+      "status": "done",
+      "nota": "rclone; vídeos (374MB) e 2 arquivos de fotos Ambev (1,7GB) não baixados por redundância"
+    },
+    {
+      "n": 2,
+      "nome": "Organizar pastas",
+      "status": "done"
+    },
+    {
+      "n": "2b",
+      "nome": "Repositório GitHub",
+      "status": "done",
+      "repo": "dev-buildv/apiceeng-site"
+    },
+    {
+      "n": 3,
+      "nome": "Design system",
+      "status": "done",
+      "nota": "paleta e tipografia derivadas do Manual da Marca real; ui-ux-pro-max não consultado"
+    },
+    {
+      "n": 4,
+      "nome": "Copy (provisória — Ramo B)",
+      "status": "done",
+      "nota": "derivada só do material visual; nenhum número ou credencial inventado"
+    },
+    {
+      "n": 5,
+      "nome": "Front-end",
+      "status": "done",
+      "nota": "HTML+CSS+JS vanilla; 3 páginas"
+    },
+    {
+      "n": 6,
+      "nome": "Ajustes finais",
+      "status": "done",
+      "nota": "imagens 71,7MB→1,6MB (-97,8%); overflow 0 em 320–1920px; contraste WCAG AA/AAA medido"
+    },
+    {
+      "n": 7,
+      "nome": "Tags e módulos LGPD",
+      "status": "done",
+      "nota": "cookies + Política + Fornecedores/Trabalhe Conosco + backend PHP instalados; GTM/Merlin pulados por falta de IDs"
+    },
+    {
+      "n": 8,
+      "nome": "Revisão humana",
+      "status": "doing",
+      "nota": "preview local em http://localhost:4173"
+    },
+    {
+      "n": 9,
+      "nome": "Deploy",
+      "status": "blocked",
+      "nota": "pasta deploy-vercel/ pronta; falta hospedagem, domínio e secrets"
+    }
   ],
-  "pendencias": [],
+  "pendencias": [
+    {
+      "id": "whatsapp",
+      "area": "conteudo",
+      "bloqueia": "deploy",
+      "titulo": "Número real de WhatsApp",
+      "detalhe": "Todos os CTAs usam o placeholder 5511999999999. Trocar em deploy-vercel/*.html (6 ocorrências por página)."
+    },
+    {
+      "id": "copy-oficial",
+      "area": "conteudo",
+      "bloqueia": "revisao",
+      "titulo": "Copy oficial do cliente",
+      "detalhe": "O briefing (Aprofundamento.xlsx) veio em branco. A copy no ar é PROVISÓRIA — ver Copys/copy-provisoria.md, seção 'Pendências de copy'."
+    },
+    {
+      "id": "numeros",
+      "area": "conteudo",
+      "bloqueia": "revisao",
+      "titulo": "Números de autoridade",
+      "detalhe": "Anos de atuação, m² executados, nº de obras, CNPJ e CREA/CAU. Nada foi assumido — não há números no site."
+    },
+    {
+      "id": "clientes",
+      "area": "juridico",
+      "bloqueia": "deploy",
+      "titulo": "Autorização para citar Ambev e Sicredi",
+      "detalhe": "O site cita as marcas nominalmente e mostra fotos das obras. Confirmar autorização de uso."
+    },
+    {
+      "id": "contato",
+      "area": "conteudo",
+      "bloqueia": "deploy",
+      "titulo": "Telefone, e-mail, endereço e redes sociais",
+      "detalhe": "Marcados como [A CONFIRMAR] na Política de Privacidade e ausentes do rodapé."
+    },
+    {
+      "id": "dpo",
+      "area": "juridico",
+      "bloqueia": "deploy",
+      "titulo": "Razão social, CNPJ e e-mail do encarregado (DPO)",
+      "detalhe": "Campos [A CONFIRMAR] em deploy-vercel/politica-de-privacidade.html."
+    },
+    {
+      "id": "hospedagem",
+      "area": "infra",
+      "bloqueia": "deploy",
+      "titulo": "Definir hospedagem e domínio",
+      "detalhe": "Vercel (Root Directory = deploy-vercel) ou Hostinger (workflow FTP pronto). Domínio assumido nos metadados: apicearqeng.com.br — confirmar."
+    },
+    {
+      "id": "secrets-ftp",
+      "area": "infra",
+      "bloqueia": "deploy",
+      "titulo": "Secrets FTP (se Hostinger)",
+      "detalhe": "FTP_HOST, FTP_USER, FTP_PASSWORD nos secrets do repo; opcional a variable FTP_REMOTE_DIR."
+    },
+    {
+      "id": "banco",
+      "area": "infra",
+      "bloqueia": "formulario",
+      "titulo": "Banco MySQL + db-config.php",
+      "detalhe": "Criar o banco e copiar db-config.example.php para db-config.php no servidor. Sem isso o formulário de fornecedores não grava."
+    },
+    {
+      "id": "tags",
+      "area": "marketing",
+      "bloqueia": "nada",
+      "titulo": "IDs de GTM/GA4/Pixel e Merlin",
+      "detalhe": "Não instalados por falta de IDs. O banner de cookies já emite cookie_consent no dataLayer para as tags respeitarem a LGPD."
+    },
+    {
+      "id": "fonte-neoteric",
+      "area": "design",
+      "bloqueia": "nada",
+      "titulo": "Licença da fonte Neoteric",
+      "detalhe": "O arquivo entregue é 'BOLD DEMO VERSION' — sem licença para web. O wordmark segue como imagem PNG oficial e o site usa Jost + Barlow (Google Fonts). Se a licença for adquirida, dá para trocar."
+    }
+  ],
   "links": {
     "drive": "https://drive.google.com/drive/folders/1olCAkmYKoTa6e4lr3c4EUFqQIxXBnE3M",
-    "repo": null, "preview": null, "dominio": null
+    "repo": "https://github.com/dev-buildv/apiceeng-site",
+    "preview": "http://localhost:4173",
+    "dominio": null
   }
 }

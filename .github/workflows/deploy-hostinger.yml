@@ -1,0 +1,38 @@
+name: Deploy Hostinger (FTP)
+
+# Publica a pasta estática deploy-vercel/ no Hostinger via FTP.
+# Requer os secrets FTP_HOST, FTP_USER e FTP_PASSWORD no repositório.
+# Só roda quando disparado manualmente ou em push na main.
+
+on:
+  push:
+    branches: [main]
+    paths: ['deploy-vercel/**', '.github/workflows/deploy-hostinger.yml']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir se os secrets FTP existem
+        run: |
+          if [ -z "${{ secrets.FTP_HOST }}" ]; then
+            echo "::error::Secrets FTP ausentes. Configure FTP_HOST, FTP_USER e FTP_PASSWORD."
+            exit 1
+          fi
+
+      - name: Enviar por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy-vercel/
+          server-dir: ${{ vars.FTP_REMOTE_DIR || '/public_html/' }}
+          # db-config.php vive só no servidor e nunca é sobrescrito
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/db-config.php

@@ -11,14 +11,31 @@
 
 - [x] 1. Extrair do Drive
 - [x] 2. Organizar pastas
-- [ ] 2b. Repositório GitHub
-- [ ] 3. Design system
-- [ ] 4. Copy (provisória — Ramo B)
-- [ ] 5. Front-end
-- [ ] 6. Ajustes finais (imagens + responsividade)
-- [ ] 7. Tags e módulos LGPD
-- [ ] 8. Revisão humana
-- [ ] 9. Deploy
+- [x] 2b. Repositório GitHub — `dev-buildv/apiceeng-site`
+- [x] 3. Design system — `design-system/tokens.md`
+- [x] 4. Copy **provisória** (Ramo B) — `Copys/copy-provisoria.md`
+- [x] 5. Front-end — `Site/` (HTML + CSS + JS vanilla)
+- [x] 6. Ajustes finais — imagens 71,7 MB → 1,6 MB (−97,8 %); overflow 0 de 320 a 1920 px
+- [x] 7. Módulos LGPD (cookies + Política + Fornecedores + backend PHP). Tags: puladas, sem IDs
+- [ ] 8. **Revisão humana** ← *aqui*
+- [ ] 9. Deploy — bloqueado por hospedagem/domínio/secrets
+
+## Preview local
+
+```bash
+node preview-server.js     # http://localhost:4173
+node audit.js              # auditoria: overflow, menu, lightbox, contraste, a11y
+```
+
+## Resultado da auditoria (27/08/2026)
+
+- Overflow horizontal: **0** em 320, 360, 375, 414, 768, 1024, 1280, 1440 e 1920 px, nas 3 páginas
+- Grade do portfólio: 3 / 2 / 1 colunas — conforme requisito BuildV
+- Menu hambúrguer, lightbox (setas + Esc + retorno de foco) e banner de cookies: funcionando
+- Contraste medido: todos os pares passam AA; a maioria AAA
+- `prefers-reduced-motion`: revelações e smooth scroll desligados
+- Erros de JS/console/rede: **nenhum**
+- CTA = botão de WhatsApp em 5 pontos; **zero formulários na home**
 
 ## Inventário do material
 

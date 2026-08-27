@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fornecedores e Trabalhe Conosco — Ápice Arquitetura e Engenharia</title>
+<meta name="description" content="Cadastre sua empresa como fornecedora da Ápice ou envie sua candidatura para trabalhar conosco em obras corporativas e industriais.">
+<meta name="theme-color" content="#121212">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/img/favicon.png" type="image/png" sizes="512x512">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="header is-stuck" id="header">
+  <div class="header__inner">
+    <a class="brand" href="index.html" aria-label="Ápice Arquitetura e Engenharia — início">
+      <img src="assets/img/logo-horizontal-branco.webp" alt="Ápice Arquitetura e Engenharia" width="600" height="223">
+    </a>
+    <button class="burger" id="burger" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Navegação principal">
+      <a href="index.html#servicos">Serviços</a>
+      <a href="index.html#obras">Obras</a>
+      <a href="index.html#sobre">A Ápice</a>
+      <a href="politica-de-privacidade.html">Privacidade</a>
+      <a class="btn" href="https://wa.me/5511999999999" target="_blank" rel="noopener">WhatsApp</a>
+    </nav>
+  </div>
+</header>
+<div class="nav-scrim" id="navScrim" hidden></div>
+
+<main class="page" id="conteudo">
+  <div class="shell">
+    <div class="page__inner">
+      <p class="eyebrow">Cadastro</p>
+      <h1>Fornecedores e Trabalhe Conosco</h1>
+      <p class="page__meta">Um canal só, para empresas e para profissionais.</p>
+
+      <p>
+        Trabalhamos com uma rede fixa de fornecedores e subempreiteiros, e ampliamos essa rede
+        conforme as frentes de obra abrem. Se a sua empresa fornece material ou serviço para
+        obra corporativa e industrial — ou se você quer integrar a nossa equipe — deixe seus
+        dados abaixo.
+      </p>
+      <p>
+        Analisamos todos os cadastros e entramos em contato quando houver demanda compatível.
+        Não há prazo fixo de resposta.
+      </p>
+
+      <form class="form" id="formCadastro" method="post" action="enviar.php" novalidate>
+        <p class="form__msg" id="formMsg" role="status" hidden></p>
+
+        <div class="field">
+          <label for="tipo">Eu quero</label>
+          <select id="tipo" name="tipo" required>
+            <option value="fornecedor">Cadastrar minha empresa como fornecedora</option>
+            <option value="candidato">Enviar minha candidatura (Trabalhe Conosco)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" required autocomplete="name" maxlength="120">
+        </div>
+
+        <div class="field">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" autocomplete="organization" maxlength="120">
+          <span class="field__hint">Deixe em branco se estiver se candidatando como pessoa física.</span>
+        </div>
+
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required autocomplete="email" maxlength="160">
+        </div>
+
+        <div class="field">
+          <label for="telefone">Telefone / WhatsApp</label>
+          <input type="tel" id="telefone" name="telefone" required autocomplete="tel" maxlength="30">
+        </div>
+
+        <div class="field">
+          <label for="area">Área de atuação</label>
+          <input type="text" id="area" name="area" maxlength="120" placeholder="Ex.: elétrica, estrutura metálica, pintura, engenharia civil">
+        </div>
+
+        <div class="field">
+          <label for="mensagem">Mensagem</label>
+          <textarea id="mensagem" name="mensagem" maxlength="2000" placeholder="Conte o que sua empresa fornece, ou resuma sua experiência."></textarea>
+        </div>
+
+        <!-- honeypot anti-spam: invisível para pessoas, preenchido por robôs -->
+        <div class="sr-only" aria-hidden="true">
+          <label for="website">Não preencha este campo</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <label class="form__consent">
+          <input type="checkbox" name="consentimento" value="1" required>
+          <span>
+            Autorizo a Ápice a tratar os dados enviados para avaliar este cadastro, conforme a
+            <a href="politica-de-privacidade.html">Política de Privacidade</a>.
+          </span>
+        </label>
+
+        <div>
+          <button class="btn" type="submit">Enviar cadastro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="shell">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <img src="assets/img/logo-horizontal-branco.webp" alt="Ápice Arquitetura e Engenharia" width="600" height="223" loading="lazy">
+        <p>Obras corporativas e industriais conduzidas de ponta a ponta — projeto, execução e gestão.</p>
+      </div>
+      <div>
+        <h3>Navegar</h3>
+        <ul>
+          <li><a href="index.html#servicos">Serviços</a></li>
+          <li><a href="index.html#obras">Obras</a></li>
+          <li><a href="index.html#sobre">A Ápice</a></li>
+          <li><a href="politica-de-privacidade.html">Política de Privacidade</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contato</h3>
+        <ul>
+          <li><a href="https://wa.me/5511999999999" target="_blank" rel="noopener">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; <span id="ano">2026</span> Ápice Arquitetura e Engenharia. Todos os direitos reservados.</p>
+      <p><a href="https://buildv.com.br" target="_blank" rel="noopener">Site por BuildV</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/main.js" defer></script>
+<script src="assets/js/cookies.js" defer></script>
+</body>
+</html>
