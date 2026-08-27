@@ -21,12 +21,9 @@ desktop.ini
 node_modules/
 *.log
 
-# Ferramentas locais de desenvolvimento (não fazem parte do entregável)
-preview-server.js
-audit.js
-audit-motion.js
-audit-wcag.js
-audit-contraste-foto.js
+# Os scripts de auditoria e o servidor de preview ficam versionados: o time
+# precisa deles para reverificar o site. Já as capturas e as dependências, não.
 shot.js
 package-lock.json
 node_modules/
+_raw/
