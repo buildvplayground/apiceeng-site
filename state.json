@@ -2,7 +2,7 @@
   "projeto": "apiceeng",
   "cliente": "Ápice Arquitetura e Engenharia",
   "etapa_atual": "8",
-  "atualizado_em": "2026-08-27",
+  "atualizado_em": "2026-08-31",
   "copy": {
     "tipo": "provisoria",
     "motivo": "briefing do Drive em branco (planilha template não preenchida)",
@@ -42,13 +42,13 @@
       "n": 5,
       "nome": "Front-end",
       "status": "done",
-      "nota": "HTML+CSS+JS vanilla; 3 páginas; 12 obras no portfólio; 2 faixas de imagem com parallax; sistema de movimento próprio (motion.css + motion.js)"
+      "nota": "HTML+CSS+JS vanilla; 3 páginas; 12 obras; 2 faixas com parallax; sistema de movimento conforme a especificação BuildV (split de título, lerp de roda, duração adaptativa para a animação caber na tela)"
     },
     {
       "n": 6,
       "nome": "Ajustes finais",
       "status": "done",
-      "nota": "imagens 96MB→2,8MB; 4 auditorias automatizadas passando: funcional, movimento, WCAG (axe-core sem violações) e contraste de texto sobre foto"
+      "nota": "imagens 96MB para 3,0MB; copy sem travessão; refino premium (respiro, tipografia de display, filetes finos); 4 auditorias automatizadas passando"
     },
     {
       "n": 7,

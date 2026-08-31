@@ -1,4 +1,4 @@
-/* Ápice Arquitetura e Engenharia — interações */
+/* Ápice Arquitetura e Engenharia: interações */
 (function () {
   'use strict';
 
@@ -25,7 +25,7 @@
     scrim.hidden = !open;
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
-    document.body.classList.toggle('nav-locked', open);
+    document.body.classList.toggle('is-locked', open);
   }
 
   burger.addEventListener('click', function () {
@@ -80,6 +80,7 @@
     show(i);
     if (typeof lb.showModal === 'function') lb.showModal();
     else lb.setAttribute('open', '');
+    document.body.classList.add('is-locked');
   }
 
   works.forEach(function (w, i) {
@@ -101,6 +102,7 @@
   });
 
   lb.addEventListener('close', function () {
+    document.body.classList.remove('is-locked');
     if (opener) { opener.focus(); opener = null; }
   });
 })();

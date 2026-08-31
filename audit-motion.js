@@ -94,6 +94,139 @@ const BASE = 'http://localhost:4173';
   check(linha2.slice(3, 6).join(',') === '0ms,70ms,140ms',
     'segunda linha REINICIA a cascata (nao acumula)', linha2.slice(3, 6));
 
+  /* ---------- 3b. Titulo palavra por palavra ---------- */
+  console.log('\n=== SPLIT DE TITULO ===');
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(700);
+    const r = await p2.evaluate(() => {
+      const h2s = [...document.querySelectorAll('#conteudo h2')];
+      const comSplit = h2s.filter(h => h.dataset.split === '1');
+      const um = comSplit[0];
+      return {
+        h2: h2s.length,
+        split: comSplit.length,
+        soft: h2s.filter(h => h.getAttribute('data-anim') === 'soft').length,
+        // o texto tem de sobreviver a divisao, sem espaco perdido
+        textoIntacto: um ? /\S \S/.test(um.textContent) : false,
+        palavras: um ? um.querySelectorAll('.w > i').length : 0,
+        atrasos: um ? [...um.querySelectorAll('.w > i')].slice(0, 4)
+          .map(i => i.style.getPropertyValue('--wd')) : [],
+        h1Preservado: !!document.querySelector('.hero h1 em'),
+      };
+    });
+    check(r.split >= 4, 'titulos de texto puro divididos em palavras', { split: r.split, de: r.h2 });
+    check(r.soft === r.split, 'bloco do titulo dividido passa a "soft"', { soft: r.soft });
+    check(r.textoIntacto, 'espacos entre palavras preservados');
+    check(r.atrasos.join(',') === '0ms,42ms,84ms,126ms', 'stagger de 42ms por palavra', r.atrasos);
+    check(r.h1Preservado, 'h1 com <em> NAO e dividido (marcacao preservada)');
+
+    // as palavras sobem de dentro da mascara e chegam a zero
+    await p2.evaluate(() => document.querySelector('#servicos h2').scrollIntoView({ block: 'center' }));
+    await p2.waitForTimeout(1800);
+    const fim = await p2.evaluate(() => {
+      const i = document.querySelector('#servicos h2 .w > i');
+      const w = i.closest('.w');
+      return { tr: getComputedStyle(i).transform, overflow: getComputedStyle(w).overflow,
+               isIn: document.querySelector('#servicos h2').classList.contains('is-in') };
+    });
+    check(fim.tr === 'none' || fim.tr === 'matrix(1, 0, 0, 1, 0, 0)',
+      'palavras terminam em repouso', fim.tr);
+    check(fim.overflow === 'hidden', 'cada palavra tem mascara propria', fim.overflow);
+    await c.close();
+  }
+
+  /* ---------- 3c. A animacao cabe na tela ---------- */
+  console.log('\n=== A ANIMACAO TERMINA A VISTA ===');
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(700);
+
+    // rolagem media: o motor deve encurtar a duracao, nao deixar a animacao
+    // terminar fora da tela
+    for (let i = 0; i < 10; i++) { await p2.mouse.wheel(0, 320); await p2.waitForTimeout(45); }
+    await p2.waitForTimeout(1200);
+
+    const r = await p2.evaluate(() => {
+      const revelados = [...document.querySelectorAll('[data-anim].is-in')];
+      const comDur = revelados.filter(e => e.style.getPropertyValue('--dur'));
+      const acimaDaTela = revelados.filter(e => e.getBoundingClientRect().bottom < 0);
+      return {
+        revelados: revelados.length,
+        encurtados: comDur.length,
+        duracoes: comDur.slice(0, 5).map(e => e.style.getPropertyValue('--dur')),
+        // nada que ja saiu por cima pode estar com opacidade parcial
+        fantasmas: acimaDaTela.filter(e => {
+          const o = +getComputedStyle(e).opacity;
+          return o > 0.02 && o < 0.98;
+        }).length,
+      };
+    });
+    check(r.fantasmas === 0, 'nada segue animando acima da dobra', r.fantasmas);
+    check(r.duracoes.every(d => parseInt(d, 10) >= 260),
+      'duracao encurtada nunca fica abaixo do minimo', r.duracoes);
+    console.log(`     (${r.revelados} revelados, ${r.encurtados} com duracao encurtada)`);
+    await c.close();
+  }
+
+  /* ---------- 3d. Scroll suave por lerp ---------- */
+  console.log('\n=== LERP DA RODA DO MOUSE ===');
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(600);
+
+    // um unico giro de roda deve produzir movimento gradual, nao um salto
+    await p2.evaluate(() => scrollTo(0, 0));
+    await p2.waitForTimeout(300);
+    await p2.mouse.move(700, 500);
+    await p2.mouse.wheel(0, 600);
+    const amostras = [];
+    for (let i = 0; i < 8; i++) {
+      amostras.push(await p2.evaluate(() => Math.round(scrollY)));
+      await p2.waitForTimeout(55);
+    }
+    const cresceGradual = amostras.some((v, i) => i > 0 && v > amostras[i - 1] && v < 600);
+    const chegou = amostras[amostras.length - 1] > 300;
+    check(cresceGradual && chegou, 'a roda move em passos, nao em salto', amostras.join(' '));
+
+    // o loop cede quando outro codigo mexe no scroll
+    await p2.mouse.wheel(0, 2000);
+    await p2.waitForTimeout(60);
+    await p2.evaluate(() => scrollTo(0, 0));
+    await p2.waitForTimeout(500);
+    const cedeu = await p2.evaluate(() => Math.round(scrollY));
+    check(cedeu < 60, 'o lerp cede a um scroll externo', cedeu);
+
+    // nao sequestra a roda com o lightbox aberto
+    await p2.evaluate(() => document.querySelector('.work[data-i="0"]').scrollIntoView({ block: 'center' }));
+    await p2.waitForTimeout(500);
+    await p2.click('.work[data-i="0"]');
+    await p2.waitForTimeout(500);
+    const yAntes = await p2.evaluate(() => Math.round(scrollY));
+    await p2.mouse.wheel(0, 700);
+    await p2.waitForTimeout(500);
+    const yDepois = await p2.evaluate(() => Math.round(scrollY));
+    check(Math.abs(yDepois - yAntes) < 40, 'com o lightbox aberto a pagina nao rola',
+      { yAntes, yDepois });
+    await p2.keyboard.press('Escape');
+
+    // teclado: End vai ao fim
+    await p2.waitForTimeout(400);
+    await p2.evaluate(() => document.body.focus());
+    await p2.keyboard.press('End');
+    await p2.waitForTimeout(1400);
+    const noFim = await p2.evaluate(() =>
+      scrollY >= (document.documentElement.scrollHeight - innerHeight) - 8);
+    check(noFim, 'End leva ao fim da pagina');
+    await c.close();
+  }
+
   /* ---------- 4. Reveal ao rolar ---------- */
   console.log('\n=== REVEAL AO ROLAR ===');
   const alvo = '#obras .work[data-i="11"]';

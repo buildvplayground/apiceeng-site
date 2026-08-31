@@ -14,8 +14,8 @@
 - [x] 2b. Repositório GitHub — `dev-buildv/apiceeng-site`
 - [x] 3. Design system — `design-system/tokens.md`
 - [x] 4. Copy **provisória** (Ramo B) — `Copys/copy-provisoria.md`
-- [x] 5. Front-end — `Site/` (HTML + CSS + JS vanilla), 12 obras, 2 faixas com parallax
-- [x] 6. Ajustes finais — imagens 96 MB → 2,8 MB; 4 auditorias automatizadas passando
+- [x] 5. Front-end: `Site/` (HTML + CSS + JS vanilla), 12 obras, 2 faixas com parallax
+- [x] 6. Ajustes finais: imagens 96 MB para 3,0 MB; 4 auditorias automatizadas passando
 - [x] 7. Módulos LGPD (cookies + Política + Fornecedores + backend PHP). Tags: puladas, sem IDs
 - [ ] 8. **Revisão humana** ← *aqui*
 - [ ] 9. Deploy — bloqueado por hospedagem/domínio/secrets
@@ -52,8 +52,13 @@ node audit-contraste-foto.js    # contraste de texto sobre fotografia
 - Nenhuma linha acima de 82 caracteres, nenhuma coluna abaixo de 26, **nenhuma palavra órfã**
   na última linha — em desktop, tablet e celular
 
-**Movimento**
-- Entradas por `data-anim` (`up`, `left`, `mask`, `clip`), cascata calculada no lote que entra
-- Parallax no hero e nas faixas, header que encolhe, barra de progresso de leitura
+**Movimento** (segue `skills/gerar-frontend/sistema-de-movimento.md`)
+- Gestos por `data-anim`: `up`, `left`, `soft`, `fig`, `mask`, `curtain`
+- **Títulos divididos palavra por palavra**, subindo de dentro de uma máscara (42ms entre elas)
+- **A animação começa e termina na tela**: o motor mede o tempo de viewport restante e
+  encurta a duração, ou revela pronto se não couber
+- Scroll suave por lerp na roda do mouse, que cede a scroll externo e não sequestra
+  área rolável nem overlay aberto
+- Parallax de 0,10 a 0,12, header que encolhe, barra de leitura
 - **Não anima** para quem rola rápido, sobe, salta de âncora ou já está no fim da página
 - `prefers-reduced-motion` desliga tudo; sem JavaScript o site aparece inteiro

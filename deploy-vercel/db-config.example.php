@@ -12,6 +12,6 @@ return [
     // Para onde vai o aviso de novo cadastro
     'notificar_email'  => 'contato@apicearqeng.com.br',
 
-    // Remetente do aviso — deve ser um endereço do próprio domínio
+    // Remetente do aviso: deve ser um endereço do próprio domínio
     'remetente_email'  => 'no-reply@apicearqeng.com.br',
 ];

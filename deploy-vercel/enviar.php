@@ -3,7 +3,7 @@
  * Recebe o cadastro de Fornecedores / Trabalhe Conosco.
  * Grava no MySQL e envia um e-mail de aviso. Sem dependências externas.
  *
- * Requer db-config.php na mesma pasta (fora do git — ver db-config.example.php).
+ * Requer db-config.php na mesma pasta (fora do git; ver db-config.example.php).
  */
 
 declare(strict_types=1);
@@ -93,15 +93,15 @@ try {
 /* ---------- Avisa por e-mail ---------- */
 if (!empty($config['notificar_email'])) {
     $rotulo  = $tipo === 'candidato' ? 'Trabalhe Conosco' : 'Fornecedor';
-    $assunto = '=?UTF-8?B?' . base64_encode("[Site Ápice] Novo cadastro — {$rotulo}") . '?=';
+    $assunto = '=?UTF-8?B?' . base64_encode("[Site Ápice] Novo cadastro: {$rotulo}") . '?=';
     $corpo   = "Tipo: {$rotulo}\n"
              . "Nome: {$nome}\n"
-             . "Empresa: " . ($empresa !== '' ? $empresa : '—') . "\n"
+             . "Empresa: " . ($empresa !== '' ? $empresa : 'não informada') . "\n"
              . "E-mail: {$email}\n"
              . "Telefone: {$telefone}\n"
-             . "Área: " . ($area !== '' ? $area : '—') . "\n\n"
-             . "Mensagem:\n" . ($mensagem !== '' ? $mensagem : '—') . "\n\n"
-             . 'Gravado no banco: ' . ($gravou ? 'sim' : 'NÃO — verifique o log') . "\n";
+             . "Área: " . ($area !== '' ? $area : 'não informada') . "\n\n"
+             . "Mensagem:\n" . ($mensagem !== '' ? $mensagem : 'sem mensagem') . "\n\n"
+             . 'Gravado no banco: ' . ($gravou ? 'sim' : 'NÃO, verifique o log') . "\n";
 
     $headers = "From: {$config['remetente_email']}\r\n"
              . "Reply-To: {$email}\r\n"
@@ -110,7 +110,7 @@ if (!empty($config['notificar_email'])) {
     @mail($config['notificar_email'], $assunto, $corpo, $headers);
 }
 
-responder(true, 'Cadastro recebido. Obrigado — entraremos em contato se houver demanda compatível.');
+responder(true, 'Cadastro recebido. Obrigado, entraremos em contato se houver demanda compatível.');
 
 /* ================= helpers ================= */
 
@@ -135,7 +135,7 @@ function responder(bool $ok, string $msg): void
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{$titulo} — Ápice</title>
+<title>{$titulo} | Ápice</title>
 <link rel="stylesheet" href="assets/css/style.css"></head>
 <body><main class="page"><div class="shell"><div class="page__inner">
 <p class="eyebrow">Fornecedores</p><h1>{$titulo}</h1><p>{$seguro}</p>

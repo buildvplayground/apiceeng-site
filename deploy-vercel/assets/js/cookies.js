@@ -1,4 +1,4 @@
-/* Banner de consentimento de cookies — LGPD
+/* Banner de consentimento de cookies (LGPD)
    Emite evento no dataLayer para que as tags só disparem após o consentimento. */
 (function () {
   'use strict';
@@ -32,7 +32,7 @@
   banner.setAttribute('aria-label', 'Aviso de cookies');
   banner.innerHTML =
     '<p class="cookiebar__txt">Usamos cookies para entender como o site é usado e melhorar a sua ' +
-    'experiência. Você pode aceitar ou recusar — recusar não afeta a navegação. ' +
+    'experiência. Você pode aceitar ou recusar. Recusar não afeta a navegação. ' +
     '<a href="politica-de-privacidade.html">Política de Privacidade</a>.</p>' +
     '<div class="cookiebar__actions">' +
       '<button type="button" class="btn btn--ghost" data-act="rejected">Recusar</button>' +
