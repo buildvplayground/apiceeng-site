@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- BuildV: GTM -->
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NNR28VWJ');</script>
+<!-- End Google Tag Manager -->
+<!-- /BuildV: GTM -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Política de Privacidade | Ápice Arquitetura e Engenharia</title>
@@ -15,8 +24,48 @@
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/motion.css">
 <script src="assets/js/motion.js"></script>
+
+<!-- MERLIN -->
+<script src='https://scripts.gomerlin.com.br/merlin.js'></script>
+<script>
+  Merlin.Popup.initFromSource("https://tools.gomerlin.com.br/popup/eb72bc42-ac95-4d5d-b7d2-bc868579cc42");
+
+  function waitForElm(selector) {
+    return new Promise(function(resolve) {
+      if (document.querySelector(selector)) {
+        return resolve(document.querySelector(selector));
+      }
+      var observer = new MutationObserver(function() {
+        if (document.querySelector(selector)) {
+          resolve(document.querySelector(selector));
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    });
+  }
+
+  waitForElm('.merlin-button').then(function() {
+    for (var i = 1; i <= 15; i++) {
+      var el = document.getElementById('cta-merlin' + i);
+      if (el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelector('.merlin-button').click();
+        });
+      }
+    }
+  });
+</script>
+<!-- /MERLIN -->
 </head>
 <body>
+<!-- BuildV: GTM (noscript) -->
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NNR28VWJ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<!-- /BuildV: GTM (noscript) -->
 
 <div class="progress" aria-hidden="true"></div>
 
@@ -35,7 +84,7 @@
       <a href="index.html#obras">Obras</a>
       <a href="index.html#sobre">A Ápice</a>
       <a href="fornecedores.html">Fornecedores</a>
-      <a class="btn" href="https://wa.me/5511999999999" target="_blank" rel="noopener">WhatsApp</a>
+      <button type="button" class="btn" id="cta-merlin1">WhatsApp</button>
     </nav>
   </div>
 </header>

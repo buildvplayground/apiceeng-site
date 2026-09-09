@@ -82,6 +82,15 @@
 /* Terminou: devolve a camada de composição ao navegador */
 .js [data-anim].is-done{will-change:auto}
 
+/* Um contêiner que só orquestra o stagger — isto é, que carrega outro
+   [data-anim] dentro — não pode também se deslocar: o filho somaria dois
+   movimentos (no "sobre", ainda por cima em eixos cruzados, o pai para a
+   esquerda e o filho para cima). O contêiner fica passivo e o filho carrega
+   o único movimento da seção, como já fazem .services, .process e .grid. */
+.js [data-anim]:has([data-anim]){
+  opacity:1;transform:none;filter:none;transition:none;will-change:auto;
+}
+
 /* Revelação sem transição: para quem rolou rápido, voltou, saltou de âncora,
    já está no fim da página, ou não tem tela sobrando para a animação caber. */
 .js [data-anim].is-instant,
@@ -172,7 +181,7 @@
    5. Faixas de imagem com parallax
    ------------------------------------------------------------ */
 .band{position:relative;overflow:hidden}
-.band__media{position:relative;display:grid;overflow:hidden;background:var(--ink)}
+.band__media{position:relative;display:grid;overflow:hidden;background:var(--ink);width:var(--shell);margin-inline:auto}
 .band__frame{grid-area:1/1;position:relative;overflow:hidden;aspect-ratio:21/9}
 .band__frame img{
   position:absolute;inset:-10% 0;
