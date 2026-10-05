@@ -425,6 +425,10 @@ body.is-locked{overflow:hidden}
 .wa:hover{transform:scale(1.07);background:var(--sand)}
 .wa svg{width:27px;height:27px;fill:currentColor}
 
+/* Botão flutuante do Merlin com a cor da identidade (aparece como aro; o ícone
+   servido é opaco, então a marca só pinta a borda do botão) */
+.merlin-button{background:var(--bronze)!important}
+
 /* Movimento: ver motion.css */
 
 /* ============================ RESPONSIVO ============================ */
@@ -477,6 +481,12 @@ body.is-locked{overflow:hidden}
   .lb__btn{width:44px;height:44px}
   .lb__fig{padding:4rem 1rem 3rem}
   .footer__bottom{flex-direction:column;align-items:flex-start}
+}
+
+/* Alvos de toque de 44px em dispositivos de toque (WCAG 2.5.5). Só em ponteiro
+   grosso: no desktop com mouse, a densidade e o sublinhado do nav ficam intactos. */
+@media (pointer:coarse){
+  .nav a,.footer a,.footer__bottom a{min-height:44px}
 }
 
 /* ============================ BANNER DE COOKIES (LGPD) ============================ */

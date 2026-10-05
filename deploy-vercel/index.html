@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<!-- BuildV: GTM -->
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NNR28VWJ');</script>
+<!-- End Google Tag Manager -->
+<!-- /BuildV: GTM -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ápice Arquitetura e Engenharia | Obras corporativas e industriais</title>
@@ -37,8 +46,48 @@
   "knowsAbout":["Obra corporativa","Retrofit","Obra industrial","Piso industrial","Pavimentação","Terraplenagem","Projeto arquitetônico","BIM","Gerenciamento de obra"]
 }
 </script>
+
+<!-- MERLIN -->
+<script src='https://scripts.gomerlin.com.br/merlin.js'></script>
+<script>
+  Merlin.Popup.initFromSource("https://tools.gomerlin.com.br/popup/eb72bc42-ac95-4d5d-b7d2-bc868579cc42");
+
+  function waitForElm(selector) {
+    return new Promise(function(resolve) {
+      if (document.querySelector(selector)) {
+        return resolve(document.querySelector(selector));
+      }
+      var observer = new MutationObserver(function() {
+        if (document.querySelector(selector)) {
+          resolve(document.querySelector(selector));
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    });
+  }
+
+  waitForElm('.merlin-button').then(function() {
+    for (var i = 1; i <= 15; i++) {
+      var el = document.getElementById('cta-merlin' + i);
+      if (el) {
+        el.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelector('.merlin-button').click();
+        });
+      }
+    }
+  });
+</script>
+<!-- /MERLIN -->
 </head>
 <body>
+<!-- BuildV: GTM (noscript) -->
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NNR28VWJ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<!-- /BuildV: GTM (noscript) -->
 
 <div class="progress" aria-hidden="true"></div>
 
@@ -59,10 +108,10 @@
       <a href="#processo">Como trabalhamos</a>
       <a href="#obras">Obras</a>
       <a href="#sobre">A Ápice</a>
-      <a class="btn" href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20sobre%20uma%20obra." target="_blank" rel="noopener">
+      <button type="button" class="btn" id="cta-merlin1">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.1-1.34A10 10 0 1 0 12 2Zm0 18.1a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.03.8.81-2.95-.2-.31A8.1 8.1 0 1 1 12 20.1Zm4.46-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.03-.38-1.96-1.21-.72-.65-1.21-1.44-1.35-1.68-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.81-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.11.16 1.52.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
         WhatsApp
-      </a>
+      </button>
     </nav>
   </div>
 </header>
@@ -82,17 +131,13 @@
         Projeto, planejamento, execução e gestão sob um só contrato, com equipe própria em campo e um engenheiro responsável do primeiro traço à entrega das chaves.
       </p>
       <div class="hero__cta">
-        <a class="btn" href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20sobre%20uma%20obra." target="_blank" rel="noopener">
+        <button type="button" class="btn" id="cta-merlin2">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.1-1.34A10 10 0 1 0 12 2Zm0 18.1a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.03.8.81-2.95-.2-.31A8.1 8.1 0 1 1 12 20.1Zm4.46-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.03-.38-1.96-1.21-.72-.65-1.21-1.44-1.35-1.68-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.81-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.11.16 1.52.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
           Falar com a Ápice
-        </a>
+        </button>
         <a class="btn btn--ghost" href="#obras">Ver obras</a>
       </div>
 
-      <p class="hero__marks">
-        <strong>Obras entregues para</strong>
-        <span>Ambev</span><span>Sicredi</span>
-      </p>
     </div>
   </section>
 
@@ -349,10 +394,10 @@
           Conte o que precisa ser feito, onde e para quando. Respondemos com uma visita
           técnica e um caminho claro, sem formulário longo, direto no WhatsApp.
         </p>
-        <a class="btn" href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20sobre%20uma%20obra." target="_blank" rel="noopener">
+        <button type="button" class="btn" id="cta-merlin3">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.1-1.34A10 10 0 1 0 12 2Zm0 18.1a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.03.8.81-2.95-.2-.31A8.1 8.1 0 1 1 12 20.1Zm4.46-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.03-.38-1.96-1.21-.72-.65-1.21-1.44-1.35-1.68-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.81-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.11.16 1.52.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
           Chamar no WhatsApp
-        </a>
+        </button>
         <p class="cta__note">Atendimento comercial em dias úteis.</p>
       </div>
     </div>
@@ -392,12 +437,6 @@
     </div>
   </div>
 </footer>
-
-<aside class="wa-dock" aria-label="Contato rápido">
-<a class="wa" href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20gostaria%20de%20falar%20sobre%20uma%20obra." target="_blank" rel="noopener" aria-label="Falar com a Ápice no WhatsApp">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.05L2 22l5.1-1.34A10 10 0 1 0 12 2Zm0 18.1a8.1 8.1 0 0 1-4.13-1.13l-.3-.18-3.03.8.81-2.95-.2-.31A8.1 8.1 0 1 1 12 20.1Zm4.46-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.03-.38-1.96-1.21-.72-.65-1.21-1.44-1.35-1.68-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.81-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.11.16 1.52.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
-</a>
-</aside>
 
 <!-- ============================ LIGHTBOX ============================ -->
 <dialog class="lb" id="lb" aria-label="Fotos da obra">

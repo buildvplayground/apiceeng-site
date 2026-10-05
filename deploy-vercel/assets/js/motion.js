@@ -243,14 +243,19 @@
       requestAnimationFrame(abrirPrimeira);
       setTimeout(abrirPrimeira, 140);
 
-      /* Rede de segurança para saltos: barra de rolagem arrastada, âncora,
-         hash na URL. Nada disso gera callback de observer para o que foi
-         pulado, e sem este flush o bloco ficaria invisível para sempre. */
+      /* Rede de segurança no scroll. O observer é só o caminho rápido: ele
+         não dispara para o que foi pulado (barra arrastada, âncora, hash) nem
+         quando a aba estava oculta, e em alguns navegadores a posição que ele
+         enxerga fica defasada. Este flush lê a geometria real (getBounding
+         ClientRect, sempre exata) e revela por conta própria, para que nenhum
+         elemento dependa unicamente do observer. */
       var flush = function () {
         var vh = window.innerHeight, fim = naZonaFinal();
+        var entrando = [];
         pendentes = pendentes.filter(function (el) {
           if (el.classList.contains('is-in')) return false;
           var r = el.getBoundingClientRect();
+          // já passou (ou fim da página): entra pronto, sem animar
           if (fim || r.bottom < vh * 0.3) { io.unobserve(el); revelar(el, 0, true); return false; }
           // máscara e cortina nascem 100% recortadas (clip-path 101%), e um alvo
           // totalmente recortado nunca "intersecta" para o observer: sem isto a
@@ -260,8 +265,19 @@
           }
           return true;
         });
+        // revela o lote com a mesma ordem, stagger e decisão do observer, para
+        // que a sensação seja idêntica quando é o flush, e não o IO, que dispara
+        if (entrando.length) {
+          entrando.sort(function (a, b) { return (a.r.top - b.r.top) || (a.r.left - b.r.left); });
+          var geral = deveSerInstantaneo();
+          entrando.forEach(function (o, i) {
+            io.unobserve(o.el);
+            revelar(o.el, i * stepDe(o.el), geral || deveSerInstantaneo(o.r), o.r);
+          });
+        }
       };
       window.addEventListener('scroll', flush, { passive: true });
+      flush();
     }
 
     /* ========================================================
