@@ -96,15 +96,22 @@ p{margin:0;text-wrap:pretty}
   position:fixed;inset:0 0 auto;z-index:100;
   height:var(--header-h);
   display:flex;align-items:center;
-  background:rgba(18,18,18,0);
   border-bottom:1px solid transparent;
-  transition:background .4s var(--ease),border-color .4s var(--ease),backdrop-filter .4s;
+  transition:border-color .4s var(--ease);
 }
-.header.is-stuck{
+/* Fundo e desfoque num pseudo-elemento: backdrop-filter no próprio header o
+   tornaria o bloco de contenção do menu (position:fixed) e prenderia o painel
+   do celular na altura do header depois de rolar a página. */
+.header::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:rgba(18,18,18,.92);
-  backdrop-filter:blur(14px);
-  border-bottom-color:var(--rule);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;transition:opacity .4s var(--ease);
 }
+.header.is-stuck::before{opacity:1}
+.header.is-stuck{border-bottom-color:var(--rule)}
+/* menu aberto: o header (onde mora o nav) fica acima do véu escuro (105) */
+.header.is-menu{z-index:106}
 .header__inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:var(--shell);margin-inline:auto}
 .brand{display:block;flex:none}
 .brand img{width:clamp(124px,17vw,168px)}

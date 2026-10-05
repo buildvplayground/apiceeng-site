@@ -91,6 +91,13 @@ node audit-contraste-foto.js    # contraste de texto sobre fotografia
 - Auditorias novas para tudo isso (palco em 6 combinações de janela/fonte, banner de cookies, clique de
   mouse sem salto, Tab no celular, estado durante a rolagem, anúncio do lightbox, dims das galerias).
 
+**Bugs anteriores à branch corrigidos (commit separado, achados pelo mesmo checklist)**
+- Foto do Sobre e citações das faixas (data-anim mask/curtain) só apareciam saindo da tela: um alvo
+  100% recortado por clip-path nunca intersecta para o IntersectionObserver.
+- Menu do celular: o toque no link caía no véu escuro e só fechava o menu; com a página rolada, o
+  backdrop-filter do header prendia o painel na altura do header (os links sumiam).
+- Teste de cascata do audit-motion era intermitente (~1 em 10): rolagem calma no teste.
+
 **Pendências do cliente desta rodada**
 - Originais em alta (não WhatsApp) das fotos de equipe e das obras industriais; a faixa está em 1280 px.
 - Autorização da Ambev para letreiros e marcas; nome da unidade de Santa Cruz (CDD ou Cervejaria).

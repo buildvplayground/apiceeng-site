@@ -252,6 +252,12 @@
           if (el.classList.contains('is-in')) return false;
           var r = el.getBoundingClientRect();
           if (fim || r.bottom < vh * 0.3) { io.unobserve(el); revelar(el, 0, true); return false; }
+          // máscara e cortina nascem 100% recortadas (clip-path 101%), e um alvo
+          // totalmente recortado nunca "intersecta" para o observer: sem isto a
+          // foto do Sobre e as citações das faixas só apareciam saindo da tela
+          if (/^(mask|curtain)$/.test(el.dataset.anim) && r.top < vh * 0.96 && r.bottom > 0) {
+            io.unobserve(el); revelar(el, 0, deveSerInstantaneo(r), r); return false;
+          }
           return true;
         });
       };

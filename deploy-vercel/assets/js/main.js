@@ -21,6 +21,8 @@
 
   function setNav(open) {
     nav.classList.toggle('is-open', open);
+    // o header sobe acima do véu enquanto o menu está aberto (o nav vive dentro dele)
+    header.classList.toggle('is-menu', open);
     scrim.classList.toggle('is-on', open);
     scrim.hidden = !open;
     burger.setAttribute('aria-expanded', String(open));

@@ -82,15 +82,23 @@ const BASE = 'http://localhost:4173';
   await page.waitForTimeout(500);
   const alvoY = await page.evaluate(() =>
     document.querySelector('.services').getBoundingClientRect().top - innerHeight + 260);
-  await rolarDevagar(page, alvoY);
+  // passos de leitura calma: com 90px/55ms o pico de velocidade do lerp às vezes
+  // passa do limite de "rolagem rápida" do motor e a linha entra pronta (correto
+  // para o motor, mas não é o que este teste mede)
+  await rolarDevagar(page, alvoY, 60, 80);
   const linha1 = await page.evaluate(() =>
     [...document.querySelectorAll('.services > .service')].map(e => e.style.getPropertyValue('--d')));
-  await rolarDevagar(page, 300);
+  // diagnóstico, só aparece se a cascata falhar
+  const diag1 = await page.evaluate(() => ({ y: Math.round(scrollY),
+    cards: [...document.querySelectorAll('.services > .service')].slice(0, 3)
+      .map(e => e.className.replace('service', '').trim() + '@' + Math.round(e.getBoundingClientRect().top)) }));
+  await rolarDevagar(page, 300, 60, 80);
   const linha2 = await page.evaluate(() =>
     [...document.querySelectorAll('.services > .service')].map(e => e.style.getPropertyValue('--d')));
 
   check(linha1.slice(0, 3).join(',') === '0ms,70ms,140ms',
-    'primeira linha de servicos cascateia 0/70/140', linha1.slice(0, 3));
+    'primeira linha de servicos cascateia 0/70/140',
+    linha1.slice(0, 3).join(',') === '0ms,70ms,140ms' ? linha1.slice(0, 3) : { d: linha1.slice(0, 3), ...diag1 });
   check(linha2.slice(3, 6).join(',') === '0ms,70ms,140ms',
     'segunda linha REINICIA a cascata (nao acumula)', linha2.slice(3, 6));
 
@@ -329,6 +337,38 @@ const BASE = 'http://localhost:4173';
   check(depois.op > 0.95 && depois.isIn && depois.tr === 'none', 'carrossel revelado ao entrar', depois);
   const slidesAnimados = await page.evaluate(() => document.querySelectorAll('#obrasTrilho [data-anim]').length);
   check(slidesAnimados === 0, 'nenhum data-anim dentro do trilho (nada escondido fora da vista lateral)', slidesAnimados);
+
+  /* ---------- 4a. Máscara e cortina revelam com o elemento na tela ----------
+     Um alvo 100% recortado por clip-path nunca intersecta para o observer;
+     aqui nada é forçado: rola devagar até centralizar e exige a revelação. */
+  console.log('\n=== MÁSCARA E CORTINA NA TELA ===');
+  {
+    const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const p2 = await c.newPage();
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(600);
+    const alvos = await p2.evaluate(() => [...document.querySelectorAll('[data-anim="mask"],[data-anim="curtain"]')]
+      .map((e, i) => { e.setAttribute('data-teste', i); return i; }));
+    const presos = [];
+    for (const i of alvos) {
+      const destino = await p2.evaluate(i => {
+        const e = document.querySelector(`[data-teste="${i}"]`);
+        const b = e.getBoundingClientRect();
+        return Math.round(b.top + scrollY - innerHeight / 2 + b.height / 2);
+      }, i);
+      let y = await p2.evaluate(() => scrollY);
+      while (y < destino) { y = Math.min(destino, y + 40); await p2.evaluate(v => scrollTo(0, v), y); await p2.waitForTimeout(45); }
+      await p2.waitForTimeout(1500);
+      const r = await p2.evaluate(i => {
+        const e = document.querySelector(`[data-teste="${i}"]`);
+        return { isIn: e.classList.contains('is-in'), top: Math.round(e.getBoundingClientRect().top) };
+      }, i);
+      if (!r.isIn) presos.push({ i, ...r });
+    }
+    check(alvos.length >= 4 && presos.length === 0, 'foto do Sobre e citações das faixas aparecem na tela (sem forçar classe)',
+      { total: alvos.length, presos });
+    await c.close();
+  }
 
   /* ---------- 4b. Guardas: quando NAO animar ---------- */
   console.log('\n=== QUANDO NAO ANIMAR ===');

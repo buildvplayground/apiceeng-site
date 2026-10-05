@@ -63,6 +63,40 @@ const BASE = 'http://localhost:4173';
   console.log('burger visível:', burgerVisible, '| abre:', navOpen, '| Esc fecha:', navClosed);
   if (!burgerVisible || !navOpen.open || !navClosed) fails++;
 
+  // o toque no link precisa cair no link (não no véu) e navegar, no topo e com a
+  // página rolada (header com fundo); e o painel ocupa a altura da tela
+  for (const yInicial of [0, 1500]) {
+    const ctxT = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const pt = await ctxT.newPage();
+    await pt.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await pt.evaluate(y => scrollTo(0, y), yInicial);
+    await pt.waitForTimeout(400);
+    await pt.tap('#burger');
+    await pt.waitForTimeout(600);
+    const m = await pt.evaluate(() => {
+      const nav = document.getElementById('nav').getBoundingClientRect();
+      const links = [...document.querySelectorAll('#nav a')].filter(a => a.getAttribute('href').startsWith('#'));
+      const tocaveis = links.filter(a => {
+        const b = a.getBoundingClientRect();
+        const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+        return e && e.closest('a') === a;
+      }).length;
+      return { altura: Math.round(nav.height), vh: innerHeight, tocaveis, total: links.length };
+    });
+    const alvo = await pt.$('#nav a[href="#obras"]');
+    const caixa = await alvo.boundingBox();
+    await pt.touchscreen.tap(caixa.x + caixa.width / 2, caixa.y + caixa.height / 2);
+    await pt.waitForTimeout(1400);
+    const depois = await pt.evaluate(() => ({ y: Math.round(scrollY),
+      topoObras: Math.round(document.getElementById('obras').getBoundingClientRect().top),
+      aberto: document.getElementById('nav').classList.contains('is-open') }));
+    const ok = m.tocaveis === m.total && m.altura >= m.vh - 2 && !depois.aberto && Math.abs(depois.topoObras) < 140;
+    console.log(`${ok ? 'OK  ' : 'FAIL'} menu por toque (página em y=${yInicial}): ${m.tocaveis}/${m.total} links tocáveis,` +
+      ` painel ${m.altura}/${m.vh}px, "Obras" leva a #obras (topo a ${depois.topoObras}px)`);
+    if (!ok) fails++;
+    await ctxT.close();
+  }
+
   console.log('\n=== LIGHTBOX POR OBRA ===');
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });

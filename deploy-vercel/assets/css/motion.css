@@ -246,7 +246,7 @@
 .footer a,.nav a{transition:color var(--dur-ui) var(--e2)}
 
 /* Header: encolhe depois da primeira dobra, devolvendo altura à leitura */
-.header{transition:background .45s var(--e2),border-color .45s var(--e2),height .45s var(--e2)}
+.header{transition:border-color .45s var(--e2),height .45s var(--e2)}
 .header.is-compact{height:60px}
 .header .brand img{transition:width .45s var(--e2)}
 .header.is-compact .brand img{width:clamp(104px,13vw,132px)}
