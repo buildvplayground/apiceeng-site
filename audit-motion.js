@@ -30,7 +30,7 @@ const BASE = 'http://localhost:4173';
       abaixoDaDobra: abaixo.length,
       abaixoInvisiveis: abaixo.filter(e => +getComputedStyle(e).opacity < 0.05 ||
         getComputedStyle(e).clipPath.includes('inset')).length,
-      ultimoCardOpacity: +getComputedStyle(document.querySelector('.work[data-i="11"]')).opacity,
+      carrosselOpacity: +getComputedStyle(document.getElementById('obrasCarrossel')).opacity,
     };
   });
   check(inicial.jsClass, 'html.js aplicado antes do paint');
@@ -216,6 +216,91 @@ const BASE = 'http://localhost:4173';
       { yAntes, yDepois });
     await p2.keyboard.press('Escape');
 
+    // roda vertical sobre o carrossel segue no lerp; gesto lateral move o trilho
+    await p2.evaluate(() => scrollTo(0, 0));
+    await p2.waitForTimeout(300);
+    await p2.evaluate(() => document.getElementById('obrasTrilho').scrollIntoView({ block: 'center' }));
+    await p2.waitForTimeout(500);
+    const caixa = await p2.evaluate(() => {
+      const b = document.getElementById('obrasTrilho').getBoundingClientRect();
+      return { x: b.left + b.width / 2, y: b.top + b.height / 2 };
+    });
+    await p2.mouse.move(caixa.x, caixa.y);
+    const y0 = await p2.evaluate(() => Math.round(scrollY));
+    await p2.mouse.wheel(0, 500);
+    const amostrasC = [];
+    for (let i = 0; i < 6; i++) { amostrasC.push(await p2.evaluate(() => Math.round(scrollY)) - y0); await p2.waitForTimeout(50); }
+    check(amostrasC.some((v, i) => i > 0 && v > amostrasC[i - 1] && v < 500) && amostrasC[5] > 150,
+      'roda vertical sobre o carrossel rola a página em passos', amostrasC.join(' '));
+    await p2.waitForTimeout(900);
+    await p2.evaluate(() => document.getElementById('obrasTrilho').scrollIntoView({ block: 'center' }));
+    await p2.waitForTimeout(400);
+    const cx = await p2.evaluate(() => {
+      const b = document.getElementById('obrasTrilho').getBoundingClientRect();
+      return { x: b.left + b.width / 2, y: b.top + b.height / 2 };
+    });
+    await p2.mouse.move(cx.x, cx.y);
+    const antesX = await p2.evaluate(() => ({ x: document.getElementById('obrasTrilho').scrollLeft, y: Math.round(scrollY) }));
+    await p2.mouse.wheel(400, 0);
+    await p2.waitForTimeout(700);
+    const depoisX = await p2.evaluate(() => ({ x: document.getElementById('obrasTrilho').scrollLeft, y: Math.round(scrollY) }));
+    check(depoisX.x > antesX.x, 'gesto lateral do trackpad também passa as obras', { antesX, depoisX });
+
+    // avanço preso à rolagem: com o topo da seção no topo da tela, a roda
+    // passa as obras com o palco travado e, no fim do trilho, a página segue
+    const topoObras = await p2.evaluate(() => {
+      const s = document.getElementById('obras');
+      return { fixo: s.classList.contains('obras--fixo'), y: Math.round(s.getBoundingClientRect().top + scrollY) };
+    });
+    check(topoObras.fixo, 'tela grande com mouse: carrossel em modo travado');
+    await p2.evaluate(y => scrollTo(0, y), topoObras.y);
+    await p2.waitForTimeout(400);
+    await p2.mouse.move(cx.x, cx.y);
+    const trava = [];
+    for (let i = 0; i < 6; i++) {
+      await p2.mouse.wheel(0, 240); await p2.waitForTimeout(160);
+      trava.push(await p2.evaluate(() => ({ x: Math.round(document.getElementById('obrasTrilho').scrollLeft),
+        palco: Math.round(document.querySelector('.obras__palco').getBoundingClientRect().top) })));
+    }
+    check(trava.every(t => Math.abs(t.palco) <= 1) && trava.every((t, i) => i === 0 || t.x > trava[i - 1].x),
+      'a roda avança as obras com o palco travado', trava.map(t => t.x + '@' + t.palco).join(' '));
+    // durante a rolagem o estado visível acompanha o trilho, quadro a quadro
+    const coerente = await p2.evaluate(() => {
+      const t = document.getElementById('obrasTrilho');
+      const passo = document.querySelector('.carousel__slide').getBoundingClientRect().width +
+        (parseFloat(getComputedStyle(t).columnGap) || 0);
+      const primeira = Math.min(6, Math.ceil(t.scrollLeft / passo - 0.02) + 1);
+      const st = document.getElementById('obrasStatus').textContent;
+      return { primeira, st, ok: st.includes(' ' + primeira + ' ') || t.scrollLeft >= t.scrollWidth - t.clientWidth - 2 };
+    });
+    check(coerente.ok, 'o estado "Obras X a Y" acompanha o trilho durante a rolagem', coerente);
+    for (let i = 0; i < 18; i++) { await p2.mouse.wheel(0, 320); await p2.waitForTimeout(70); }
+    await p2.waitForTimeout(900);
+    const solta = await p2.evaluate(() => {
+      const t = document.getElementById('obrasTrilho');
+      return { noFim: t.scrollLeft >= t.scrollWidth - t.clientWidth - 2,
+               palco: Math.round(document.querySelector('.obras__palco').getBoundingClientRect().top) };
+    });
+    check(solta.noFim && solta.palco < -50, 'depois da última obra o palco solta e a página segue', solta);
+
+    // clique de mouse num card com a seção ainda entrando na tela: abre a
+    // galeria e a página não salta (o foco do mousedown não pode rolar nada)
+    await p2.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY) - 250));
+    await p2.waitForTimeout(600);
+    const alvoCard = await p2.evaluate(() => {
+      const b = document.querySelector('.work[data-i="1"]').getBoundingClientRect();
+      return { x: b.left + b.width / 2, y: b.top + Math.min(b.height / 2, 60) };
+    });
+    const yClique = await p2.evaluate(() => Math.round(scrollY));
+    await p2.mouse.click(alvoCard.x, alvoCard.y);
+    await p2.waitForTimeout(500);
+    const clique = await p2.evaluate(() => ({ aberto: document.getElementById('lb').open, y: Math.round(scrollY) }));
+    check(clique.aberto && Math.abs(clique.y - yClique) < 4, 'clique de mouse no card abre a galeria sem a página saltar', { ...clique, yClique });
+    await p2.keyboard.press('Escape');
+    await p2.waitForTimeout(400);
+    const yFechou = await p2.evaluate(() => Math.round(scrollY));
+    check(Math.abs(yFechou - yClique) < 4, 'fechar a galeria devolve o foco sem rolar a página', { yFechou, yClique });
+
     // teclado: End vai ao fim
     await p2.waitForTimeout(400);
     await p2.evaluate(() => document.body.focus());
@@ -229,8 +314,10 @@ const BASE = 'http://localhost:4173';
 
   /* ---------- 4. Reveal ao rolar ---------- */
   console.log('\n=== REVEAL AO ROLAR ===');
-  const alvo = '#obras .work[data-i="11"]';
-  const antes = inicial.ultimoCardOpacity;
+  // o reveal é do carrossel inteiro: slide fora da vista lateral nunca fica
+  // preso invisível esperando um observer que não dispararia
+  const alvo = '#obrasCarrossel';
+  const antes = inicial.carrosselOpacity;
   await page.evaluate(s => document.querySelector(s).scrollIntoView({ block: 'center' }), alvo);
   await page.waitForTimeout(2000);
   const depois = await page.evaluate(s => {
@@ -238,8 +325,10 @@ const BASE = 'http://localhost:4173';
     const cs = getComputedStyle(el);
     return { op: +cs.opacity, tr: cs.transform, isIn: el.classList.contains('is-in') };
   }, alvo);
-  check(antes < 0.05, 'último card começa invisível', antes);
-  check(depois.op > 0.95 && depois.isIn && depois.tr === 'none', 'último card revelado ao entrar', depois);
+  check(antes < 0.05, 'carrossel de obras começa invisível', antes);
+  check(depois.op > 0.95 && depois.isIn && depois.tr === 'none', 'carrossel revelado ao entrar', depois);
+  const slidesAnimados = await page.evaluate(() => document.querySelectorAll('#obrasTrilho [data-anim]').length);
+  check(slidesAnimados === 0, 'nenhum data-anim dentro do trilho (nada escondido fora da vista lateral)', slidesAnimados);
 
   /* ---------- 4b. Guardas: quando NAO animar ---------- */
   console.log('\n=== QUANDO NAO ANIMAR ===');
@@ -382,20 +471,19 @@ const BASE = 'http://localhost:4173';
     'header encolhe e ganha fundo ao rolar', { hTopo: Math.round(hTopo), h: Math.round(hRolado.h) });
 
   /* ---------- 8. Filetes animados ---------- */
-  console.log('\n=== FILETES (eyebrow e etapas) ===');
+  console.log('\n=== FILETES (etapas) ===');
   const filetes = await page.evaluate(() => {
     const step = document.querySelector('.step.is-in .step__rule');
-    const eb = document.querySelector('.eyebrow__rule');
     return {
       stepScale: step ? getComputedStyle(step).transform : null,
       stepIsIn: !!step,
-      ebScale: eb ? getComputedStyle(eb).transform : null,
+      // o eyebrow ficou sem filete a pedido do cliente (05/10/2026)
+      eyebrowsComFilete: document.querySelectorAll('.eyebrow .eyebrow__rule, .eyebrow i').length,
     };
   });
   check(filetes.stepIsIn && filetes.stepScale && !filetes.stepScale.includes('matrix(0'),
     'régua da etapa cresceu até 100%', filetes.stepScale);
-  check(filetes.ebScale && !filetes.ebScale.includes('matrix(0'),
-    'filete do eyebrow cresceu', filetes.ebScale);
+  check(filetes.eyebrowsComFilete === 0, 'eyebrows sem filete', filetes.eyebrowsComFilete);
 
   /* ---------- 9. Sem JavaScript, o site aparece inteiro ---------- */
   console.log('\n=== SEM JAVASCRIPT ===');

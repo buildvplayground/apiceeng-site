@@ -63,7 +63,7 @@ const BASE = 'http://localhost:4173';
   console.log('burger visível:', burgerVisible, '| abre:', navOpen, '| Esc fecha:', navClosed);
   if (!burgerVisible || !navOpen.open || !navClosed) fails++;
 
-  console.log('\n=== LIGHTBOX ===');
+  console.log('\n=== LIGHTBOX POR OBRA ===');
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await page.click('.work[data-i="0"]');
@@ -72,25 +72,105 @@ const BASE = 'http://localhost:4173';
     open: document.getElementById('lb').open,
     src: document.getElementById('lbImg').getAttribute('src'),
     title: document.getElementById('lbTitle').textContent,
+    count: document.getElementById('lbCount').textContent,
+    setas: !document.getElementById('lbNext').hidden,
   }));
   await page.click('#lbNext');
   await page.waitForTimeout(300);
-  const lb2 = await page.evaluate(() => document.getElementById('lbTitle').textContent);
+  const lb2 = await page.evaluate(() => ({
+    src: document.getElementById('lbImg').getAttribute('src'),
+    title: document.getElementById('lbTitle').textContent,
+    count: document.getElementById('lbCount').textContent,
+    anuncio: document.getElementById('lbLive').textContent,
+    nome: document.getElementById('lb').getAttribute('aria-label'),
+  }));
+  const anunciou = /^Foto 2 de \d+: \S/.test(lb2.anuncio) && lb2.nome.includes(lb2.title);
+  console.log(`${anunciou ? 'OK  ' : 'FAIL'} troca de foto anunciada ("${lb2.anuncio.slice(0, 40)}…") e diálogo nomeado com a obra`);
+  if (!anunciou) fails++;
   await page.keyboard.press('Escape');
   await page.waitForTimeout(400);
   const lbClosed = await page.evaluate(() => !document.getElementById('lb').open);
   const focusBack = await page.evaluate(() => document.activeElement.classList.contains('work'));
-  console.log('abre:', lb.open, '|', lb.title, '→ next →', lb2, '| Esc fecha:', lbClosed, '| foco volta:', focusBack);
-  if (!lb.open || lb.title === lb2 || !lbClosed || !focusBack) fails++;
+  // a seta avança DENTRO da obra: a foto e o contador mudam, o título da obra não
+  const naObra = lb2.src !== lb.src && lb2.title === lb.title && /^2 \/ \d+$/.test(lb2.count);
+  console.log('abre:', lb.open, '|', lb.title, lb.count, '→ next →', lb2.count,
+    '| mesma obra, outra foto:', naObra, '| Esc fecha:', lbClosed, '| foco volta:', focusBack);
+  if (!lb.open || !/^1 \/ \d+$/.test(lb.count) || !lb.setas || !naObra || !lbClosed || !focusBack) fails++;
 
-  console.log('\n=== GRADE DO PORTFÓLIO ===');
-  for (const [w, exp] of [[1280, 3], [900, 2], [400, 1]]) {
+  // toda galeria declarada existe no servidor e o "N fotos" do card bate com ela
+  const galerias = await page.evaluate(() => [...document.querySelectorAll('.work')].map(w => ({
+    fotos: (w.getAttribute('data-gallery') || '').split('|'),
+    dims: (w.getAttribute('data-dims') || '').split('|'),
+    legendas: (w.getAttribute('data-legendas') || '').split('|').filter(l => l.trim()).length,
+    // "6 fotos" ou "4 fotos e 2 projetos 3D": soma os números da contagem visível
+    n: (w.querySelector('.work__n').textContent.match(/\d+(?= (fotos?|projetos?))/g) || []).reduce((t, x) => t + +x, 0),
+  })));
+  let galeriaOk = true;
+  for (const g of galerias) {
+    if (g.fotos.length !== g.n || g.legendas !== g.n || g.dims.length !== g.n) galeriaOk = false;
+    for (let k = 0; k < g.fotos.length; k++) {
+      const f = g.fotos[k];
+      if (!f.trim()) { galeriaOk = false; console.log('       entrada vazia na galeria'); continue; }
+      const r = await page.request.get(BASE + '/' + f);
+      if (r.status() !== 200) { galeriaOk = false; console.log('       foto ausente:', f); continue; }
+      // a dimensão declarada (usada no lightbox para não saltar) bate com o arquivo?
+      const real = await page.evaluate(src => new Promise(ok => {
+        const i = new Image(); i.onload = () => ok(i.naturalWidth + 'x' + i.naturalHeight); i.onerror = () => ok('erro'); i.src = src;
+      }), f);
+      if (real !== g.dims[k]) { galeriaOk = false; console.log(`       ${f}: data-dims ${g.dims[k]} ≠ real ${real}`); }
+    }
+  }
+  console.log(`${galeriaOk ? 'OK  ' : 'FAIL'} galerias: ${galerias.map(g => g.fotos.length).join('/')} fotos, legendas e "N fotos" conferem`);
+  if (!galeriaOk) fails++;
+
+  /* Carrossel de obras: exceção registrada ao "grade 3/2/1" (pedido do cliente,
+     05/10/2026), com obras maiores: 2 inteiras + a próxima pela borda no desktop,
+     1 + borda no tablet e no celular. Card = obra e número par continuam valendo.
+     Em tela grande com mouse o avanço é preso à rolagem (palco travado): a seta
+     rola a página até a obra seguinte. */
+  console.log('\n=== CARROSSEL DO PORTFÓLIO ===');
+  for (const [w, exp] of [[1280, 2], [800, 1], [400, 1]]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const cols = await page.evaluate(() =>
-      getComputedStyle(document.getElementById('grid')).gridTemplateColumns.split(' ').length);
-    console.log(`${cols === exp ? 'OK  ' : 'FAIL'} ${w}px → ${cols} colunas (esperado ${exp})`);
-    if (cols !== exp) fails++;
+    // posiciona a seção no topo antes de medir e clicar: o clique do Playwright
+    // rola até o botão, e no modo travado essa rolagem por si só já moveria o trilho
+    await page.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY)));
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(() => {
+      const t = document.getElementById('obrasTrilho');
+      const tr = t.getBoundingClientRect();
+      const slides = [...t.querySelectorAll('.carousel__slide')];
+      const inteiros = slides.filter(s => {
+        const b = s.getBoundingClientRect();
+        return b.left >= tr.left - 1 && b.right <= tr.right + 1;
+      }).length;
+      return {
+        inteiros, total: slides.length,
+        rotulos: slides.every((s, i) => s.getAttribute('aria-label') === `${i + 1} de ${slides.length}`),
+        prev: document.getElementById('obrasPrev').getAttribute('aria-disabled'),
+        status: document.getElementById('obrasStatus').textContent,
+        x0: t.scrollLeft,
+      };
+    });
+    const fixo = await page.evaluate(() => document.getElementById('obras').classList.contains('obras--fixo'));
+    await page.click('#obrasNext');
+    await page.waitForTimeout(1600);
+    const depois = await page.evaluate(() => ({
+      x: document.getElementById('obrasTrilho').scrollLeft,
+      prev: document.getElementById('obrasPrev').getAttribute('aria-disabled'),
+      status: document.getElementById('obrasStatus').textContent,
+      passo: document.querySelector('.carousel__slide').getBoundingClientRect().width +
+        (parseFloat(getComputedStyle(document.getElementById('obrasTrilho')).columnGap) || 0),
+    }));
+    // a seta avança exatamente uma "página" de obras inteiras, nem mais nem menos
+    const umaPagina = Math.abs((depois.x - r.x0) - depois.passo * r.inteiros) <= 3;
+    const ok = r.inteiros === exp && r.total % 2 === 0 && r.rotulos && r.prev === 'true' &&
+      umaPagina && depois.prev === 'false' && depois.status !== r.status;
+    // o modo travado só existe com mouse e acima de 900px
+    const modoOk = fixo === (w > 900);
+    console.log(`${ok && modoOk ? 'OK  ' : 'FAIL'} ${w}px → ${r.inteiros} obra(s) inteira(s) por vista (esperado ${exp}), ${r.total} obras,` +
+      ` ${fixo ? 'avanço preso à rolagem' : 'carrossel de arrastar'}, "${r.status}" → próxima → "${depois.status}"`);
+    if (!ok || !modoOk) fails++;
   }
 
   console.log('\n=== BANNER DE COOKIES ===');
