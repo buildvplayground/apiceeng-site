@@ -47,8 +47,6 @@
    para não duplicar deslocamento ("o texto carrega o movimento") */
 .js [data-anim="soft"]  {transform:none;filter:none}
 
-/* Figuras: anima o invólucro, nunca o <img>, senão o zoom de hover morre */
-.js [data-anim="fig"]{transform:scale(.965);filter:blur(4px)}
 
 /* Cortina de baixo para cima; a imagem interna sai de um leve zoom */
 .js [data-anim="mask"]{
@@ -129,15 +127,8 @@
 .js .is-done .w > i{will-change:auto}
 
 /* ------------------------------------------------------------
-   3. Filetes que crescem da esquerda
+   3. Filete das etapas, que cresce da esquerda
    ------------------------------------------------------------ */
-.eyebrow__rule{
-  transform-origin:left center;
-  transform:scaleX(var(--rule-scale,1));
-  transition:transform var(--dur-in) var(--e);
-  transition-delay:var(--d,0ms);
-}
-
 .step{position:relative;border-top-color:var(--rule)}
 .step__rule{
   position:absolute;inset:-1px auto auto 0;
@@ -150,8 +141,6 @@
 }
 .js .step[data-anim]{--rule-scale:0}
 .js .step[data-anim].is-in{--rule-scale:1}
-.js .eyebrow[data-anim]{--rule-scale:0}
-.js .eyebrow[data-anim].is-in{--rule-scale:1}
 
 /* ------------------------------------------------------------
    4. Hero: entrada encadeada no load, foto com parallax leve
@@ -189,6 +178,11 @@
   transform:translate3d(0,var(--py,0px),0);
   will-change:transform;
 }
+/* faixa de equipe: foto 4:3. No desktop o recorte é só vertical (78% tira o topo
+   do tanque e mantém a equipe inteira); no celular (4:5) a janela lateral fica
+   na esquerda, onde estão os dois profissionais com ÁPICE nas costas */
+.band--equipe .band__frame img{object-position:10% 78%}
+@media (max-width:560px){.band--equipe .band__frame img{object-position:0% 78%}}
 .band__frame::after{
   content:"";position:absolute;inset:0;
   background:
@@ -261,7 +255,7 @@
 .footer a,.nav a{transition:color var(--dur-ui) var(--e2)}
 
 /* Header: encolhe depois da primeira dobra, devolvendo altura à leitura */
-.header{transition:background .45s var(--e2),border-color .45s var(--e2),height .45s var(--e2)}
+.header{transition:border-color .45s var(--e2),height .45s var(--e2)}
 .header.is-compact{height:60px}
 .header .brand img{transition:width .45s var(--e2)}
 .header.is-compact .brand img{width:clamp(104px,13vw,132px)}
@@ -283,7 +277,6 @@
   .js [data-anim],
   .js [data-anim="mask"],
   .js [data-anim="curtain"],
-  .js [data-anim="fig"],
   .js .hero__inner > *{
     opacity:1!important;transform:none!important;
     filter:none!important;clip-path:none!important;
@@ -295,7 +288,7 @@
   .w{overflow:visible;padding:0;margin:0}
   .hero.is-ready .hero__media,
   .band__frame img{transform:none!important}
-  .eyebrow__rule,.step__rule{transform:scaleX(1)!important;transition:none!important}
+  .step__rule{transform:scaleX(1)!important;transition:none!important}
   .progress{display:none}
   .work__cap{transform:none;opacity:1}
   .header,.header.is-compact{height:var(--header-h);transition:none}

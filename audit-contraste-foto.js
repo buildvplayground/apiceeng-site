@@ -41,19 +41,38 @@ const PY = [
   await page.waitForLoadState('networkidle');
 
   const ALVOS = [
+    // menu transparente sobre a foto da hero (no topo, antes de o header ganhar fundo)
+    ['.nav a[href="#servicos"]', '#d5d5d6', 'menu: Serviços'],
+    ['.nav a[href="#processo"]', '#d5d5d6', 'menu: Como trabalhamos'],
+    ['.nav a[href="#obras"]', '#d5d5d6', 'menu: Obras'],
+    ['.nav a[href="#sobre"]', '#d5d5d6', 'menu: A Ápice'],
     ['.hero h1', '#fafafa', 'H1 do hero'],
     ['.hero__sub', '#d5d5d6', 'subtítulo do hero'],
     ['.hero .eyebrow', '#ce9e70', 'eyebrow do hero'],
     ['.hero__marks span', '#d5d5d6', 'marcas no hero'],
     ['.band__quote p', '#fafafa', 'citação da faixa 1'],
     ['.band__quote span', '#ce9e70', 'rótulo da faixa 1'],
-    ['.work__cap strong', '#fafafa', 'título do card'],
-    ['.work__cap span', '#ce9e70', 'tag do card'],
+    ['.band--equipe .band__quote p', '#fafafa', 'citação da faixa 2'],
+    ['.band--equipe .band__quote span', '#ce9e70', 'rótulo da faixa 2'],
   ];
+  // legendas de TODAS as obras do carrossel, não só da primeira: cada capa é um fundo
+  const nObras = await page.locator('.work').count();
+  for (let i = 0; i < nObras; i++) {
+    ALVOS.push([`.work[data-i="${i}"] .work__tag`, '#ce9e70', `tag da obra ${i + 1}`, true]);
+    ALVOS.push([`.work[data-i="${i}"] .work__cap strong`, '#fafafa', `título da obra ${i + 1}`, true]);
+    ALVOS.push([`.work[data-i="${i}"] .work__n`, '#d5d5d6', `"N fotos" da obra ${i + 1}`, true]);
+  }
 
   let fails = 0;
-  for (const [sel, cor, nome] of ALVOS) {
+  for (const [sel, cor, nome, noTrilho] of ALVOS) {
     const el = page.locator(sel).first();
+    // a obra pode estar fora da vista lateral: alinha o trilho a ela antes de medir
+    // (no modo travado o trilho segue a rolagem da página: o foco no card é o
+    // que leva página e trilho juntos até ele, como acontece com quem usa o Tab)
+    if (noTrilho) {
+      await el.evaluate(e => { const w = e.closest('.work'); w.focus({ preventScroll: true }); w.blur(); });
+      await page.waitForTimeout(350);
+    }
     if (!(await el.count())) { console.log('MISS ' + nome); fails++; continue; }
 
     await el.scrollIntoViewIfNeeded();

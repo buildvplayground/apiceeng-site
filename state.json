@@ -2,7 +2,7 @@
   "projeto": "apiceeng",
   "cliente": "Ápice Arquitetura e Engenharia",
   "etapa_atual": "8",
-  "atualizado_em": "2026-08-31",
+  "atualizado_em": "2026-10-05",
   "copy": {
     "tipo": "provisoria",
     "motivo": "briefing do Drive em branco (planilha template não preenchida)",
@@ -42,7 +42,7 @@
       "n": 5,
       "nome": "Front-end",
       "status": "done",
-      "nota": "HTML+CSS+JS vanilla; 3 páginas; 12 obras; 2 faixas com parallax; sistema de movimento conforme a especificação BuildV (split de título, lerp de roda, duração adaptativa para a animação caber na tela)"
+      "nota": "HTML+CSS+JS vanilla; 3 páginas; 6 obras em carrossel (2,4 por vista no desktop, avanço preso à rolagem do mouse); 2 faixas com parallax; sistema de movimento conforme a especificação BuildV (split de título, lerp de roda, duração adaptativa para a animação caber na tela)"
     },
     {
       "n": 6,
@@ -60,7 +60,7 @@
       "n": 8,
       "nome": "Revisão humana",
       "status": "doing",
-      "nota": "preview local em http://localhost:4173"
+      "nota": "preview local em http://localhost:4173; 1ª rodada de ajustes do cliente (05/10/2026) na branch ajuste/2026-10-05-apice-fotos-carrossel, aguardando revisão/PR"
     },
     {
       "n": 9,
@@ -146,6 +146,34 @@
       "bloqueia": "nada",
       "titulo": "Licença da fonte Neoteric",
       "detalhe": "O arquivo entregue é 'BOLD DEMO VERSION' — sem licença para web. O wordmark segue como imagem PNG oficial e o site usa Jost + Barlow (Google Fonts). Se a licença for adquirida, dá para trocar."
+    },
+    {
+      "id": "fotos-originais",
+      "area": "conteudo",
+      "bloqueia": "nada",
+      "titulo": "Originais em alta das fotos de WhatsApp",
+      "detalhe": "Faixa 'Execução com equipe própria' e galerias industriais usam fotos de 1280 px. Pedir os arquivos do celular (17/02/2025) e o vídeo da acabadora (prints IMG_0974-0978)."
+    },
+    {
+      "id": "sicredi-prova",
+      "area": "conteudo",
+      "bloqueia": "revisao",
+      "titulo": "Prova de obra Sicredi",
+      "detalhe": "O card Sicredi (render) saiu do portfólio. A hero ainda cita 'Obras entregues para Ambev, Sicredi'. Confirmar autoria e enviar fotos, ou tirar a menção."
+    },
+    {
+      "id": "servicos-sem-obra",
+      "area": "conteudo",
+      "bloqueia": "nada",
+      "titulo": "Serviços sem obra no portfólio",
+      "detalhe": "Infraestrutura e terraplenagem e Gestão de obra não têm foto que comprove o serviço. Pedir fotos ao cliente."
+    },
+    {
+      "id": "excecao-carrossel",
+      "area": "design",
+      "bloqueia": "nada",
+      "titulo": "Exceção ao requisito 'portfólio em grade 3/2/1'",
+      "detalhe": "Carrossel com obras maiores (2,4 por vista) e avanço preso à rolagem em tela grande com mouse, a pedido do cliente; decisão registrada no vault em 2026-10-05."
     }
   ],
   "links": {
@@ -159,6 +187,6 @@
     "movimento": "audit-motion.js — entradas, cascata por lote, parallax e as guardas de \"quando não animar\"",
     "wcag": "audit-wcag.js — axe-core A+AA+2.2, alvos de toque, zoom 200/400%, 1.4.12, teclado, tipografia",
     "contraste_foto": "audit-contraste-foto.js — contraste do texto sobre fotografia, pelo pior pixel do fundo",
-    "estado": "as quatro passam sem falhas em 27/08/2026"
+    "estado": "as quatro passam sem falhas em 05/10/2026 (auditorias atualizadas para o carrossel)"
   }
 }

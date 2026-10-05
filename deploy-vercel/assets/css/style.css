@@ -82,31 +82,36 @@ p{margin:0;text-wrap:pretty}
   outline:2px solid var(--bronze);outline-offset:3px;
 }
 
-/* --- Eyebrow: filete bronze + rótulo, ecoando as barras do logotipo --- */
+/* --- Eyebrow: rótulo bronze em caixa alta, sem filete (pedido do cliente, 05/10/2026) --- */
 .eyebrow{
-  display:flex;align-items:center;gap:.9rem;
+  display:flex;align-items:center;
   font-family:"Jost",sans-serif;font-size:var(--fs-eyebrow);font-weight:400;
   letter-spacing:.26em;text-transform:uppercase;color:var(--bronze);
   margin:0 0 1.4rem;
 }
-.eyebrow__rule{display:block;width:52px;height:1px;background:var(--bronze);flex:none}
 .section--paper .eyebrow{color:var(--bronze-ink)}
-.section--paper .eyebrow__rule{background:var(--bronze-ink)}
 
 /* ============================ HEADER ============================ */
 .header{
   position:fixed;inset:0 0 auto;z-index:100;
   height:var(--header-h);
   display:flex;align-items:center;
-  background:rgba(18,18,18,0);
   border-bottom:1px solid transparent;
-  transition:background .4s var(--ease),border-color .4s var(--ease),backdrop-filter .4s;
+  transition:border-color .4s var(--ease);
 }
-.header.is-stuck{
+/* Fundo e desfoque num pseudo-elemento: backdrop-filter no próprio header o
+   tornaria o bloco de contenção do menu (position:fixed) e prenderia o painel
+   do celular na altura do header depois de rolar a página. */
+.header::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:rgba(18,18,18,.92);
-  backdrop-filter:blur(14px);
-  border-bottom-color:var(--rule);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  opacity:0;transition:opacity .4s var(--ease);
 }
+.header.is-stuck::before{opacity:1}
+.header.is-stuck{border-bottom-color:var(--rule)}
+/* menu aberto: o header (onde mora o nav) fica acima do véu escuro (105) */
+.header.is-menu{z-index:106}
 .header__inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:var(--shell);margin-inline:auto}
 .brand{display:block;flex:none}
 .brand img{width:clamp(124px,17vw,168px)}
@@ -171,15 +176,20 @@ body.is-locked{overflow:hidden}
 .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;padding-block:calc(var(--header-h) + 3rem) clamp(2.5rem,6vh,4.5rem);overflow:hidden}
 .hero__media{position:absolute;inset:0;z-index:0}
 .hero__media img{width:100%;height:100%;object-fit:cover}
+/* Topo escuro só na faixa do menu (o header é transparente sobre a foto);
+   o miolo e a base ficam mais leves para a sinuca e o lounge aparecerem à
+   direita. Quem segura o contraste do texto, à esquerda, são o degradê lateral
+   e o véu radial (medido em audit-contraste-foto.js, menu incluído). */
 .hero__media::after{
   content:"";position:absolute;inset:0;
   background:
     linear-gradient(180deg,
-      rgba(18,18,18,.80) 0%,
-      rgba(18,18,18,.48) 30%,
-      rgba(18,18,18,.72) 58%,
-      rgba(18,18,18,.93) 82%,
-      rgba(18,18,18,.97) 100%),
+      rgba(18,18,18,.82) 0%,
+      rgba(18,18,18,.74) 10%,
+      rgba(18,18,18,.30) 30%,
+      rgba(18,18,18,.40) 58%,
+      rgba(18,18,18,.62) 82%,
+      rgba(18,18,18,.92) 100%),
     linear-gradient(90deg,
       rgba(18,18,18,.70) 0%,
       rgba(18,18,18,.52) 24%,
@@ -252,30 +262,98 @@ body.is-locked{overflow:hidden}
 .about__body p{color:var(--gray);max-width:64ch}
 .about__media{position:relative}
 
-/* ---------- Portfólio: grade 3/2/1 com lightbox ---------- */
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(.9rem,1.6vw,1.4rem)}
+/* ---------- Portfólio: carrossel de obras com lightbox por obra ----------
+   Exceção registrada ao "grade 3/2/1": pedido do cliente (05/10/2026), com obras
+   maiores (2,4 por vista no desktop, a terceira aparecendo pela borda). O resto do
+   requisito segue: card = uma obra, "N fotos", galeria com contador, número par. */
+.carousel__track{
+  --gap:clamp(.9rem,1.6vw,1.4rem);
+  --por-vista:2.4;
+  display:grid;grid-auto-flow:column;
+  grid-auto-columns:min(
+    calc((100% - (var(--por-vista) - 1) * var(--gap)) / var(--por-vista)),
+    var(--card-max,100vw));
+  gap:var(--gap);
+  overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scrollbar-width:none;
+  /* folga para o anel de foco do card não ser cortado pelo overflow */
+  padding:6px;margin:-6px;scroll-padding-inline:6px;
+}
+.carousel__track::-webkit-scrollbar{display:none}
+.carousel__slide{scroll-snap-align:start;min-width:0;display:flex}
+/* Controles ACIMA das obras (padrão APG) e à direita: embaixo, com o palco
+   travado, o banner de cookies (inferior esquerdo) e o botão do WhatsApp
+   (inferior direito) os cobririam o tempo todo. */
+.carousel__nav{
+  display:flex;align-items:center;justify-content:flex-end;gap:1rem;
+  margin-bottom:clamp(1rem,2vw,1.4rem);
+}
+.carousel__nav[hidden]{display:none}
+.carousel__status{
+  font-family:"Jost",sans-serif;font-size:var(--fs-small);letter-spacing:.06em;
+  color:var(--gray);min-width:10.5em;text-align:center;font-variant-numeric:tabular-nums;
+}
+.carousel__btn{
+  width:48px;height:48px;display:grid;place-items:center;flex:none;
+  background:transparent;border:1px solid var(--rule);color:var(--gray-light);cursor:pointer;
+  transition:background .3s,color .3s,border-color .3s;
+}
+.carousel__btn:hover{background:var(--bronze);color:var(--ink);border-color:var(--bronze)}
+.carousel__btn[aria-disabled="true"]{opacity:.35;cursor:default}
+.carousel__btn[aria-disabled="true"]:hover{background:transparent;color:var(--gray-light);border-color:var(--rule)}
+.carousel__btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+/* Avanço preso à rolagem (tela grande com mouse; o JS liga a classe).
+   A seção ganha a altura do percurso horizontal e o palco fica preso na tela
+   enquanto a roda do mouse passa as obras; no fim do trilho a página segue.
+   O card também respeita a altura da janela, para o palco caber em 1366x768. */
+.obras--fixo{padding-block:0;height:calc(100vh + var(--percurso,0px))}
+.obras--fixo .obras__palco{
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;
+  padding-top:var(--header-h);
+}
+.obras--fixo .section__head{margin-bottom:clamp(1.4rem,3.4vh,2.8rem)}
+.obras--fixo .carousel__track{
+  overflow-x:hidden;scroll-snap-type:none;
+  --card-max:calc((100vh - var(--header-h) - 20rem) * 4 / 3);
+}
+
 .work{
   position:relative;display:grid;width:100%;padding:0;border:0;
   background:var(--graphite);cursor:zoom-in;overflow:hidden;text-align:left;
 }
 /* imagem e legenda ocupam a mesma célula: se a legenda crescer (texto a 200%),
    a célula cresce junto e nada é cortado */
-.work > img,.work__cap{grid-area:1/1}
+.work > img,.work__cap,.work__zoom{grid-area:1/1}
 .work img{
   width:100%;height:100%;aspect-ratio:4/3;object-fit:cover;
   transition:transform .7s var(--ease);
 }
 .work:hover img,.work:focus-visible img{transform:scale(1.045)}
+/* a legenda abre com a tag do serviço (bronze, pequena): o degradê já precisa
+   estar escuro na altura dela, não só no título */
 .work__cap{
   align-self:end;z-index:1;padding:2.6rem 1.3rem 1.2rem;
   background:linear-gradient(180deg,
     rgba(18,18,18,0)   0%,
-    rgba(18,18,18,.42) 26%,
-    rgba(18,18,18,.78) 58%,
-    rgba(18,18,18,.94) 100%);
+    rgba(18,18,18,.72) 17%,
+    rgba(18,18,18,.88) 30%,
+    rgba(18,18,18,.95) 100%);
 }
+.work__tag{display:block;margin-bottom:.35rem;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--bronze)}
 .work__cap strong{display:block;font-family:"Jost",sans-serif;font-weight:400;font-size:1.02rem;color:var(--paper);letter-spacing:.01em}
-.work__cap span{display:block;margin-top:.25rem;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--bronze)}
+.work__n{display:block;margin-top:.3rem;font-size:.82rem;color:var(--gray-light)}
+.work__zoom{
+  align-self:start;justify-self:end;z-index:1;margin:.85rem;
+  width:38px;height:38px;display:grid;place-items:center;
+  background:rgba(18,18,18,.72);border:1px solid var(--rule);color:var(--paper);
+  opacity:0;transform:translateY(-4px);
+  transition:opacity .45s var(--ease),transform .45s var(--ease);
+}
+.work:hover .work__zoom,.work:focus-visible .work__zoom{opacity:1;transform:none}
+@media (hover:none){.work__zoom{opacity:1;transform:none}}
+.work__zoom svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6}
 
 /* ---------- Lightbox ---------- */
 .lb{
@@ -283,11 +361,14 @@ body.is-locked{overflow:hidden}
   background:rgba(10,10,10,.96);color:var(--gray-light);
 }
 .lb::backdrop{background:rgba(10,10,10,.9)}
-.lb[open]{display:flex;align-items:center;justify-content:center}
-.lb__fig{margin:0;padding:clamp(3.5rem,7vw,4.5rem) clamp(3.5rem,8vw,5.5rem);max-width:min(1100px,100%);display:flex;flex-direction:column;gap:1rem}
+/* margin:auto na figura centraliza sem cortar: com zoom de 400% a foto passa da
+   altura do diálogo, e align-items:center jogaria o topo para fora, inalcançável */
+.lb[open]{display:flex;justify-content:center}
+.lb__fig{margin:auto;padding:clamp(3.5rem,7vw,4.5rem) clamp(3.5rem,8vw,5.5rem);max-width:min(1100px,100%);display:flex;flex-direction:column;gap:1rem}
 .lb__fig img{max-height:74svh;width:auto;max-width:100%;margin-inline:auto;object-fit:contain}
 .lb__cap{font-size:.92rem;color:var(--gray);text-align:center}
 .lb__cap strong{display:block;font-family:"Jost",sans-serif;font-weight:400;font-size:1.1rem;color:var(--paper);margin-bottom:.2rem}
+.lb__count{display:block;margin-top:.45rem;font-family:"Jost",sans-serif;font-size:.8rem;letter-spacing:.14em;color:var(--bronze);font-variant-numeric:tabular-nums}
 .lb__btn{
   position:absolute;top:50%;translate:0 -50%;
   width:48px;height:48px;display:grid;place-items:center;
@@ -299,6 +380,7 @@ body.is-locked{overflow:hidden}
 .lb__next{right:clamp(.5rem,2vw,1.5rem)}
 .lb__close{position:absolute;top:clamp(.6rem,2vw,1.4rem);right:clamp(.6rem,2vw,1.4rem);translate:none}
 .lb__btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+.lb__btn[hidden]{display:none}
 
 /* ---------- CTA final ---------- */
 .cta{position:relative;overflow:hidden;background:var(--graphite)}
@@ -355,17 +437,13 @@ body.is-locked{overflow:hidden}
   .service:not(:nth-child(3n+1)){border-left:0}
   .service:not(:nth-child(2n+1)){border-left:1px solid var(--rule-dark)}
   .process{grid-template-columns:repeat(2,minmax(0,1fr));gap:1.6rem 2rem}
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .about{grid-template-columns:1fr;gap:2.5rem}
   .footer__grid{grid-template-columns:1fr 1fr;gap:2rem}
   .footer__brand{grid-column:1/-1}
 }
 
-/* Tablet largo: a galeria de obras volta a 3 colunas, aproveitando a largura
-   e encurtando a rolagem. Serviços e processo (texto) seguem em 2, mais
-   confortáveis para leitura. */
-@media (min-width:900px) and (max-width:1024px){
-  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:900px){
+  .carousel__track{--por-vista:1.7}
 }
 
 @media (max-width:860px){
@@ -392,13 +470,15 @@ body.is-locked{overflow:hidden}
 
 @media (max-width:560px){
   :root{--shell:min(1240px,100% - 2rem)}
-  .services,.grid,.process{grid-template-columns:1fr}
+  .services,.process{grid-template-columns:1fr}
+  /* uma obra por vez, com a próxima aparecendo pela borda */
+  .carousel__track{--por-vista:1.15}
+  .carousel__nav{justify-content:space-between}
   .service{border-left:0!important}
   .footer__grid{grid-template-columns:1fr}
   .hero{min-height:auto;padding-block:calc(var(--header-h) + 5rem) 3.5rem}
   .hero__cta .btn{width:100%;justify-content:center}
-  .work{aspect-ratio:3/2}
-  .lb__btn{width:42px;height:42px}
+  .lb__btn{width:44px;height:44px}
   .lb__fig{padding:4rem 1rem 3rem}
   .footer__bottom{flex-direction:column;align-items:flex-start}
 }

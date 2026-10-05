@@ -20,43 +20,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
-<link rel="stylesheet" href="assets/css/motion.css">
-<script src="assets/js/motion.js"></script>
-
-<!-- MERLIN -->
-<script src='https://scripts.gomerlin.com.br/merlin.js'></script>
-<script>
-  Merlin.Popup.initFromSource("https://tools.gomerlin.com.br/popup/eb72bc42-ac95-4d5d-b7d2-bc868579cc42");
-
-  function waitForElm(selector) {
-    return new Promise(function(resolve) {
-      if (document.querySelector(selector)) {
-        return resolve(document.querySelector(selector));
-      }
-      var observer = new MutationObserver(function() {
-        if (document.querySelector(selector)) {
-          resolve(document.querySelector(selector));
-          observer.disconnect();
-        }
-      });
-      observer.observe(document.documentElement, { childList: true, subtree: true });
-    });
-  }
-
-  waitForElm('.merlin-button').then(function() {
-    for (var i = 1; i <= 15; i++) {
-      var el = document.getElementById('cta-merlin' + i);
-      if (el) {
-        el.addEventListener('click', function(e) {
-          e.preventDefault();
-          document.querySelector('.merlin-button').click();
-        });
-      }
-    }
-  });
-</script>
-<!-- /MERLIN -->
+<link rel="stylesheet" href="assets/css/style.css?v=20261005">
+<link rel="stylesheet" href="assets/css/motion.css?v=20261005">
+<script src="assets/js/motion.js?v=20261005"></script>
 </head>
 <body>
 <!-- BuildV: GTM (noscript) -->
@@ -92,7 +58,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <main class="page" id="conteudo">
   <div class="shell">
     <div class="page__inner" data-stagger="60">
-      <p class="eyebrow" data-anim="up"><i class="eyebrow__rule" aria-hidden="true"></i>Cadastro</p>
+      <p class="eyebrow" data-anim="up">Cadastro</p>
       <h1 data-anim="up" style="--d:80ms">Fornecedores e Trabalhe Conosco</h1>
       <p class="page__meta">Um canal só, para empresas e para profissionais.</p>
 
@@ -200,7 +166,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </footer>
 
-<script src="assets/js/main.js" defer></script>
+<script src="assets/js/main.js?v=20261005" defer></script>
 <script src="assets/js/cookies.js" defer></script>
 </body>
 </html>

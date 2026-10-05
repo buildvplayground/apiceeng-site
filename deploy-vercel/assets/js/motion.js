@@ -257,8 +257,12 @@
           var r = el.getBoundingClientRect();
           // já passou (ou fim da página): entra pronto, sem animar
           if (fim || r.bottom < vh * 0.3) { io.unobserve(el); revelar(el, 0, true); return false; }
-          // entrou na tela pela base (mesmo ponto do observer, rootMargin -4%)
-          if (r.top < vh * 0.96 && r.bottom > 0) { entrando.push({ el: el, r: r }); return false; }
+          // máscara e cortina nascem 100% recortadas (clip-path 101%), e um alvo
+          // totalmente recortado nunca "intersecta" para o observer: sem isto a
+          // foto do Sobre e as citações das faixas só apareciam saindo da tela
+          if (/^(mask|curtain)$/.test(el.dataset.anim) && r.top < vh * 0.96 && r.bottom > 0) {
+            io.unobserve(el); revelar(el, 0, deveSerInstantaneo(r), r); return false;
+          }
           return true;
         });
         // revela o lote com a mesma ordem, stagger e decisão do observer, para
@@ -341,13 +345,16 @@
 
     function maxScroll() { return root.scrollHeight - window.innerHeight; }
 
-    function rolavelSob(node) {
-      // não sequestra a roda sobre área que rola por conta própria
+    function rolavelSob(node, dx, dy, lateralForcado) {
+      // não sequestra a roda sobre área que rola por conta própria, mas só no
+      // eixo em que ela rola: a roda vertical sobre o carrossel de obras
+      // continua rolando a página pelo lerp, e o gesto lateral move o trilho
+      var lateral = lateralForcado || Math.abs(dx || 0) > Math.abs(dy || 0);
       for (var i = 0; node && node !== document.body && i < 8; i++, node = node.parentElement) {
         var cs = getComputedStyle(node);
-        if ((cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
+        if (!lateral && (cs.overflowY === 'auto' || cs.overflowY === 'scroll') &&
             node.scrollHeight > node.clientHeight + 2) return true;
-        if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') &&
+        if (lateral && (cs.overflowX === 'auto' || cs.overflowX === 'scroll') &&
             node.scrollWidth > node.clientWidth + 2) return true;
       }
       return false;
@@ -395,7 +402,8 @@
     if (fino) {
       window.addEventListener('wheel', function (e) {
         if (e.ctrlKey || e.defaultPrevented) return;      // zoom do navegador
-        if (overlayAberto() || rolavelSob(e.target)) return;
+        // Shift+roda é rolagem lateral em qualquer navegador
+        if (overlayAberto() || rolavelSob(e.target, e.deltaX, e.deltaY, e.shiftKey)) return;
         e.preventDefault();
         if (!loop) { atual = window.scrollY; alvo = atual; }
         irPara(alvo + e.deltaY);
@@ -406,6 +414,9 @@
         if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
         if (t && t.isContentEditable) return;
         if (overlayAberto()) return;
+        // Espaço num botão é clique, não rolagem: sem isto o card do portfólio
+        // e as setas do carrossel não respondem ao teclado (WCAG 2.1.1)
+        if (e.key === ' ' && t && t.closest && t.closest('button, summary, [role="button"]')) return;
         var vh = window.innerHeight, base = loop ? alvo : window.scrollY, d = null;
         if (e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) d = vh * 0.9;
         else if (e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) d = -vh * 0.9;
@@ -439,7 +450,10 @@
       var alturaHeader = header ? header.getBoundingClientRect().height : 0;
 
       setTimeout(function () {
-        var y = destino.getBoundingClientRect().top + window.scrollY - alturaHeader - 8;
+        // o palco travado das obras já reserva a altura do header: desconto zero,
+        // senão a seção para 84px abaixo e as setas caem para fora da tela
+        var desconto = destino.classList.contains('obras--fixo') ? 0 : alturaHeader + 8;
+        var y = destino.getBoundingClientRect().top + window.scrollY - desconto;
         y = Math.max(0, Math.min(maxScroll(), y));
         if (fino) irPara(y); else window.scrollTo(0, y);
         if (history.replaceState) history.replaceState(null, '', href);

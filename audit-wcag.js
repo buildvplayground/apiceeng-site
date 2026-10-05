@@ -110,6 +110,54 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
     await ctx.close();
   }
 
+  /* O palco travado do carrossel (seção presa na tela) nunca pode cortar a
+     navegação nem esmagar os cards: com texto a 200%, janela baixa ou zoom, ele
+     precisa cair para o carrossel comum ou caber inteiro. */
+  console.log('\n=== PALCO TRAVADO DO CARROSSEL ===');
+  for (const [w, h, fonte, rot] of [[1440, 900, 16, 'normal'], [1280, 900, 32, 'texto 200%'], [1366, 768, 32, 'texto 200%'],
+                                    [1280, 520, 16, 'janela baixa'], [911, 512, 16, 'zoom 150%'], [1280, 720, 24, 'fonte 24px']]) {
+    const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await page.evaluate(f => {
+      document.documentElement.style.fontSize = f + 'px';
+      document.querySelectorAll('[data-anim]').forEach(e => e.classList.add('is-in'));
+      dispatchEvent(new Event('resize'));
+    }, fonte);
+    await page.waitForTimeout(300);
+    await page.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY)));
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const s = document.getElementById('obras');
+      const fixo = s.classList.contains('obras--fixo');
+      const nav = document.getElementById('obrasNav').getBoundingClientRect();
+      const trilho = document.getElementById('obrasTrilho').getBoundingClientRect();
+      const card = document.querySelector('.work').getBoundingClientRect();
+      const palco = document.querySelector('.obras__palco').getBoundingClientRect();
+      return { fixo, card: Math.round(card.width),
+               cabe: !fixo || (nav.top >= palco.top && trilho.bottom <= palco.bottom + 1 && card.width >= 260) };
+    });
+    check(r.cabe, `${rot} (${w}x${h}): ${r.fixo ? 'palco travado cabe inteiro' : 'carrossel comum'}`, r);
+    await ctx.close();
+  }
+
+  // primeira visita: o banner de cookies não pode cobrir as setas do palco travado
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await page.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY)));
+    await page.waitForTimeout(500);
+    const cobertas = await page.evaluate(() => ['obrasPrev', 'obrasNext', 'obrasStatus'].filter(id => {
+      const b = document.getElementById(id).getBoundingClientRect();
+      const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+      return !e || !e.closest('#' + id);
+    }));
+    const banner = await page.evaluate(() => !!document.querySelector('.cookiebar'));
+    check(banner && cobertas.length === 0, 'com o banner de cookies aberto, setas e estado ficam à vista', cobertas);
+    await ctx.close();
+  }
+
   /* ================= 5. Espaçamento de texto (WCAG 1.4.12) ================= */
   console.log('\n=== ESPAÇAMENTO DE TEXTO (1.4.12) ===');
   {
@@ -181,6 +229,67 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
     const lbAberto = await page.evaluate(() => document.getElementById('lb').open);
     check(lbAberto, 'lightbox abre como <dialog> modal');
     await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+
+    // Espaço e Enter num card focado abrem a galeria (2.1.1); o motor de
+    // movimento não pode transformar o Espaço em rolagem de página
+    for (const tecla of ['Space', 'Enter']) {
+      await page.evaluate(() => document.querySelector('.work[data-i="1"]').focus());
+      const yAntes = await page.evaluate(() => Math.round(scrollY));
+      await page.keyboard.press(tecla);
+      await page.waitForTimeout(500);
+      const r = await page.evaluate(() => ({ open: document.getElementById('lb').open, y: Math.round(scrollY) }));
+      check(r.open && Math.abs(r.y - yAntes) < 4, `${tecla} no card abre a galeria sem rolar a página`, { ...r, yAntes });
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+    }
+
+    // Espaço na seta do carrossel avança as obras (no modo travado, rolando a
+    // página até a obra seguinte; é o Espaço do botão, não o PageDown do motor)
+    await page.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY)));
+    await page.waitForTimeout(400);
+    await page.evaluate(() => document.getElementById('obrasNext').focus());
+    const xS = await page.evaluate(() => document.getElementById('obrasTrilho').scrollLeft);
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(1600);
+    const seta = await page.evaluate(() => ({ x: Math.round(document.getElementById('obrasTrilho').scrollLeft),
+      passo: Math.round(document.querySelector('.carousel__slide').getBoundingClientRect().width) }));
+    // avança uma página de obras, não uma tela inteira (o que o PageDown faria)
+    check(seta.x > xS && seta.x <= seta.passo * 3, 'Espaço na seta do carrossel avança as obras', seta);
+
+    // modo comum (celular): Tab até a obra que aparece pela borda a traz inteira
+    {
+      const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const p2 = await c2.newPage();
+      await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await p2.evaluate(() => document.querySelectorAll('[data-anim]').forEach(e => e.classList.add('is-in')));
+      await p2.evaluate(() => document.querySelector('.work[data-i="0"]').focus());
+      const visiveis = [];
+      for (let i = 1; i < 6; i++) {
+        await p2.keyboard.press('Tab');
+        await p2.waitForTimeout(500);
+        visiveis.push(await p2.evaluate(() => {
+          const t = document.getElementById('obrasTrilho').getBoundingClientRect();
+          const b = document.activeElement.getBoundingClientRect();
+          const vis = Math.max(0, Math.min(b.right, t.right) - Math.max(b.left, t.left)) / b.width;
+          return Math.round(vis * 100);
+        }));
+      }
+      check(visiveis.every(v => v >= 98), 'celular: cada Tab traz a obra focada inteira para o trilho', visiveis.map(v => v + '%').join(' '));
+      await c2.close();
+    }
+
+    // Tab até uma obra fora da vista lateral a traz para dentro do trilho
+    await page.evaluate(() => scrollTo(0, Math.round(document.getElementById('obras').getBoundingClientRect().top + scrollY)));
+    await page.waitForTimeout(400);
+    await page.evaluate(() => document.querySelector('.work[data-i="4"]').focus());
+    await page.waitForTimeout(600);
+    const vis = await page.evaluate(() => {
+      const t = document.getElementById('obrasTrilho').getBoundingClientRect();
+      const b = document.activeElement.getBoundingClientRect();
+      return { dentro: b.left >= t.left - 8 && b.right <= t.right + 8, left: Math.round(b.left), trilho: [Math.round(t.left), Math.round(t.right)] };
+    });
+    check(vis.dentro, 'obra focada fora da vista entra no trilho', vis);
     await ctx.close();
   }
 
@@ -270,7 +379,7 @@ const PAGES = ['/', '/politica-de-privacidade.html', '/fornecedores.html'];
       });
       // sobreposições: elementos que invadem o vizinho
       const colisoes = [];
-      const blocos = [...document.querySelectorAll('.section__head, .services, .process, .about, .grid, .cta__inner')];
+      const blocos = [...document.querySelectorAll('.section__head, .services, .process, .about, .carousel, .cta__inner')];
       for (let i = 0; i < blocos.length - 1; i++) {
         const a = blocos[i].getBoundingClientRect();
         const b = blocos[i + 1].getBoundingClientRect();
