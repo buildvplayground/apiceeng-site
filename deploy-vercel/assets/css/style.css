@@ -502,6 +502,9 @@ body.is-locked{overflow:hidden}
 .cookiebar__txt a{color:var(--bronze);text-underline-offset:3px;padding-block:.3rem}
 .cookiebar__actions{display:flex;gap:.6rem;flex:0 0 auto}
 .cookiebar .btn{padding:.65rem 1.15rem;font-size:.74rem}
+.cookie-fins{flex:1 1 100%;list-style:none;margin:0;padding:.9rem 0 0;border-top:1px solid var(--rule);display:grid;gap:.4rem;font-size:.84rem;line-height:1.5;color:var(--gray)}
+.cookie-fins[hidden]{display:none}
+.cookie-fins strong{color:var(--gray-light);font-weight:500}
 @media (max-width:560px){
   .cookiebar{left:1rem;right:1rem;width:auto;bottom:5.5rem;padding:1.1rem 1.2rem}
   .cookiebar__actions{width:100%}
