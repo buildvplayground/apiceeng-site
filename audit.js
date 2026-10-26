@@ -212,13 +212,30 @@ const BASE = 'http://localhost:4173';
   await ctx.clearCookies();
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
+  // aviso informativo: "Entendi" grava cookie_notice=ok; "Ver finalidades" abre a lista;
+  // nenhum evento de consentimento vai para o dataLayer (as tags disparam desde o carregamento)
   const barVisible = await page.isVisible('.cookiebar');
-  await page.click('.cookiebar [data-act="accepted"]');
+  const finsFechada = await page.$eval('.cookiebar [data-cookie-fins]', el => el.hidden);
+  await page.click('.cookiebar [data-cookie-more]');
+  const finsAberta = await page.evaluate(() => {
+    const fins = document.querySelector('.cookiebar [data-cookie-fins]');
+    const more = document.querySelector('.cookiebar [data-cookie-more]');
+    return !fins.hidden && more.getAttribute('aria-expanded') === 'true' &&
+      more.getAttribute('aria-controls') === fins.id;
+  });
+  await page.click('.cookiebar [data-cookie-ok]');
   await page.waitForTimeout(300);
   const dl = await page.evaluate(() => JSON.stringify(window.dataLayer || []));
   const gone = (await page.$('.cookiebar')) === null;
-  console.log('aparece:', barVisible, '| some ao aceitar:', gone, '| dataLayer:', dl);
-  if (!barVisible || !gone || !dl.includes('cookie_consent')) fails++;
+  const nota = await page.evaluate(() => localStorage.getItem('cookie_notice'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  const naoVolta = (await page.$('.cookiebar')) === null;
+  const semEvento = !/cookie_consent|consent_update|analytics_storage|ad_storage/.test(dl);
+  console.log('aparece:', barVisible, '| finalidades fechadas → abrem:', finsFechada && finsAberta,
+    '| some em "Entendi":', gone, '| cookie_notice:', nota, '| não volta após recarregar:', naoVolta,
+    '| sem evento de consentimento no dataLayer:', semEvento);
+  if (!barVisible || !finsFechada || !finsAberta || !gone || nota !== 'ok' || !naoVolta || !semEvento) fails++;
 
   console.log('\n=== LINKS ÂNCORA E CTA ===');
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
